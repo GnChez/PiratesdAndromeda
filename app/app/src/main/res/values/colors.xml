@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Colores Base -->
+    <color name="blanco">#FFFFFF</color>
+    <color name="negro">#000000</color>
+
+    <!-- Colores de Overlay y Fondos -->
+    <color name="overlay_oscuro">#AA000000</color>
+    <color name="bg_login">#DD1A1A1A</color>
+    <color name="bg_edittext">#99000000</color>
+
+    <!-- Colores de Bordes -->
+    <color name="borde_login">#33FFFFFF</color>
+    <color name="borde_edittext">#55666666</color>
+    <color name="borde_boton">#99A93226</color>
+    <color name="borde_boton_oscuro">#55666666</color>
+
+    <!-- Colores de Botones -->
+    <color name="btn_entra_start">#8B2E2E</color>
+    <color name="btn_entra_end">#5A1A1A</color>
+    <color name="sombra_roja">#DD773333</color>
+
+    <color name="btn_registrate_start">#2D2D2D</color>
+    <color name="btn_registrate_end">#1A1A1A</color>
+    <color name="sombra_oscura">#AA333333</color>
+
+    <!-- Colores de Texto -->
+    <color name="texto_campo">#CCCCCC</color>
+    <color name="hint_color">#88888888</color>
+    <color name="dorado_claro">#F5B041</color>
+    <color name="anaranjado">#994E3C</color>
+
+    <!-- Colores de Sombras -->
+    <color name="sombra_naranja">#DD773333</color>
+
+</resources>
