@@ -29,9 +29,6 @@ class MyViewHolder(
     }
 
 
-
-
-
 class MyAdapter(
     private val items : List<Natacion>
 ) : RecyclerView.Adapter<MyViewHolder>(){
