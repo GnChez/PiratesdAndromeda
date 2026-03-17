@@ -14,7 +14,7 @@
         android:layout_height="wrap_content"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginBottom="70dp"
+        android:layout_marginBottom="110dp"
         android:paddingEnd="30dp">
 
 
@@ -27,7 +27,7 @@
             app:layout_constraintTop_toTopOf="parent"
             android:text="@string/login"
             android:textColor="@color/anaranjado"
-            android:textSize="50sp" />
+            android:textSize="60sp" />
 
 
         <TextView
@@ -36,11 +36,11 @@
             android:layout_height="wrap_content"
             android:fontFamily="@font/pirata"
             android:layout_gravity="start"
-            android:text="@string/signUp"
+            android:text="@string/signUp_subrallado"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             android:textColor="@color/sombra_naranja"
-            android:layout_marginTop="5dp"
+            android:layout_marginTop="12dp"
             android:textSize="40sp" />
 
     <LinearLayout
@@ -102,20 +102,6 @@
             android:textSize="25sp"
             android:letterSpacing="0.1"/>
 
-        <Button
-            android:id="@+id/btnRegistrate"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:fontFamily="@font/pirata"
-            app:backgroundTint="@null"
-            android:background="@drawable/btnregistro"
-            android:text="@string/btn_registrate"
-            android:layout_gravity="center"
-            android:textColor="@color/blanco"
-            android:textSize="16sp"
-            android:letterSpacing="0.1"
-            android:elevation="8dp"
-            android:stateListAnimator="@null" />
 
     </LinearLayout>
     </androidx.constraintlayout.widget.ConstraintLayout>

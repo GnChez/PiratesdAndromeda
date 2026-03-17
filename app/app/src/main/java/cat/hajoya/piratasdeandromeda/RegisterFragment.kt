@@ -12,7 +12,7 @@ class RegisterFragment: Fragment() {
 
     private var _binding: RegisterBinding? = null
 
-    private var binding = _binding!!
+    private val binding get()  = _binding!!
 
     override fun onCreateView(
         inflater: LayoutInflater,

@@ -44,7 +44,7 @@ class IniciFragment: Fragment() {
 
     private fun setupListeners(){
         binding.btnRegistrate.setOnClickListener {
-
+// anar  al fragment de registre
         }
 
     }
