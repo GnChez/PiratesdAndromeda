@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/background"
+    android:fontFamily="@font/pirata"
+    tools:context=".InicioActivity">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="270dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginBottom="110dp"
+        android:paddingEnd="30dp">
+
+
+        <TextView
+            android:id="@+id/tvLogin"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/pirata"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            android:text="@string/login"
+            android:textColor="@color/anaranjado"
+            android:textSize="60sp" />
+
+
+        <TextView
+            android:id="@+id/tvSignUp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/pirata"
+            android:layout_gravity="start"
+            android:text="@string/signUp_subrallado"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            android:textColor="@color/sombra_naranja"
+            android:layout_marginTop="12dp"
+            android:textSize="40sp" />
+
+    <LinearLayout
+        android:id="@+id/llLoginContainer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_marginTop="14dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tvLogin"
+        app:layout_constraintHorizontal_bias="0.60"
+        app:layout_constraintVertical_bias="0.7"
+        >
+
+
+        <EditText
+            android:id="@+id/etUsuari"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:layout_marginBottom="10dp"
+            android:background="@drawable/edittext"
+            android:textColorHint="@color/anaranjado"
+            android:hint="@string/hint_usuari"
+            android:layout_gravity="start"
+            android:inputType="text"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
+            android:textColor="@color/anaranjado"
+            android:textSize="16sp" />
+
+
+        <EditText
+            android:id="@+id/etContrasenya"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:layout_marginBottom="32dp"
+            android:hint="@string/hint_contrasenya"
+            android:inputType="textPassword"
+            android:background="@drawable/edittext"
+            android:textColorHint="@color/anaranjado"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
+            android:textColor="@color/anaranjado"
+            android:textSize="16sp" />
+
+        <Button
+            android:id="@+id/btnEntra"
+            android:layout_width="200dp"
+            android:layout_height="60dp"
+            android:layout_marginBottom="16dp"
+            android:fontFamily="@font/pirata"
+            android:background="@drawable/btnentra"
+            app:backgroundTint="@null"
+            android:layout_gravity="center"
+            android:text="@string/btn_entra"
+            android:textColor="@color/blanco"
+            android:textSize="25sp"
+            android:letterSpacing="0.1"/>
+
+
+    </LinearLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

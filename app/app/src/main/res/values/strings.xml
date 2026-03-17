@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Nombre de la App -->
+    <string name="app_name">Piratas de Andromeda</string>
+
+    <!-- Textos de la Pantalla de Inicio -->
+    <string name="escape_room">E S C A P E   R O O M</string>
+    <string name="titulo_vertical">P I R A T A S\nD E\nA N D R O M E D A</string>
+
+    <!-- Textos del Login -->
+    <string name="login">LOGIN</string>
+    <string name="signUp">SIGN UP</string>
+    <string name="usuari">Usuari</string>
+    <string name="correo">Correu</string>
+    <string name="hint_usuari">Introduce tu usuario</string>
+    <string name="contrasenya">Contrasenya</string>
+    <string name="repContrasenya">Repeteix contrasenya</string>
+    <string name="hint_contrasenya">Introduce tu contraseña</string>
+    <string name="login_subrallado"><u>LOGIN</u></string>
+    <string name="signUp_subrallado"><u>SIGN UP</u></string>
+
+    <!-- Botones -->
+    <string name="btn_entra">ENTRA</string>
+    <string name="btn_registrate">REGISTRATE</string>
+
+</resources>
