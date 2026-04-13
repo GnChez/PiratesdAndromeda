@@ -5,7 +5,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
-import cat.hajoya.piratasdeandromeda.databinding.IniciBinding
 import cat.hajoya.piratasdeandromeda.databinding.RegisterBinding
 
 class RegisterFragment: Fragment() {
@@ -40,7 +39,15 @@ class RegisterFragment: Fragment() {
     }
 
     private fun setupListeners(){
-        binding.btnEntraReg.setOnClickListener {
+        binding.tvLogin.setOnClickListener {
+            parentFragmentManager.popBackStack()
+        }
+
+        binding.btnRegistrate.setOnClickListener {
+            parentFragmentManager.beginTransaction()
+                .replace(R.id.fragment_container, StartFrFragment())
+                .addToBackStack(null)
+                .commit()
 
         }
 

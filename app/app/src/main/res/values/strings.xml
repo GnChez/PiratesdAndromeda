@@ -23,4 +23,47 @@
     <string name="btn_entra">ENTRA</string>
     <string name="btn_registrate">REGISTRATE</string>
 
+    <!-- Pantalla Start FR -->
+    <string name="start_fr_welcome">AAARR!\nBienvenidx a bordo,\nelige tu nave</string>
+    <string name="start_fr_profile_cd">Abrir perfil</string>
+    <string name="start_fr_join_label">Unirme a una partida</string>
+    <string name="start_fr_game_code_hint">Código de partida</string>
+    <string name="start_fr_game_code_cd">Introduce el código de la partida</string>
+    <string name="start_fr_join_button">Unirme</string>
+    <string name="start_fr_join_cd">Unirse a una partida</string>
+    <string name="start_fr_create_label">Crear partida</string>
+    <string name="start_fr_create_button">Crear</string>
+    <string name="start_fr_create_cd">Crear una nueva partida</string>
+
+    <!-- Navegacion -->
+    <string name="go_to_register_cd">Ir a registro</string>
+    <string name="go_to_login_cd">Ir a inicio de sesion</string>
+
+    <!-- Configuracion de partida -->
+    <string name="cd_planet_background">Fondo de portada</string>
+    <string name="cd_user_avatar">Avatar de usuario</string>
+    <string name="cd_close_session">Cerrar sesion</string>
+    <string name="cd_cancel">Cancelar</string>
+    <string name="cd_add_room">Agregar habitacion</string>
+    <string name="cd_delete_room">Eliminar habitacion</string>
+
+    <string name="config_part_title">AAARR!\nAhora toca ponerla\na la orden!</string>
+    <string name="config_saved_ships">Naves guardadas:</string>
+    <string name="config_ship_name_label">Introduce aqui el nombre de tu nave:</string>
+    <string name="config_ship_name_hint">Ej: Nave Ron Derramado</string>
+    <string name="config_join_button">Unirme</string>
+
+    <string name="config_rooms_title">EEEYYY! Cuantos camarotes hay en tu nave?</string>
+    <string name="config_rooms_subtitle">Configura las salas de la nave:</string>
+    <string name="config_room_name_hint">Introduce nombre de habitacion</string>
+    <string name="config_next_button">Siguiente</string>
+
+    <string name="players_title">A la borda, que la odisea empieza ya!</string>
+    <string name="players_code_label">Codigo de partida:</string>
+    <string name="players_label">Jugadores a bordo:</string>
+    <string name="players_impostors_hint">Numero de impostores</string>
+    <string name="players_start_button">Empezar!</string>
+    <string name="players_sample_code">12345</string>
+    <string name="add_symbol">+</string>
+
 </resources>

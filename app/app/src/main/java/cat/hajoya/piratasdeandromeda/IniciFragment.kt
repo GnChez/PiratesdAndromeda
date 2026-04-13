@@ -43,8 +43,18 @@ class IniciFragment: Fragment() {
     }
 
     private fun setupListeners(){
-        binding.btnRegistrate.setOnClickListener {
-// anar  al fragment de registre
+        binding.tvSignUp.setOnClickListener {
+            parentFragmentManager.beginTransaction()
+                .replace(R.id.fragment_container, RegisterFragment())
+                .addToBackStack(null)
+                .commit()
+        }
+
+        binding.btnEntra.setOnClickListener {
+            parentFragmentManager.beginTransaction()
+                .replace(R.id.fragment_container, StartFrFragment())
+                .addToBackStack(null)
+                .commit()
         }
 
     }

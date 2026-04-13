@@ -28,9 +28,18 @@
     <color name="texto_campo">#CCCCCC</color>
     <color name="hint_color">#88888888</color>
     <color name="dorado_claro">#F5B041</color>
-    <color name="anaranjado">#994E3C</color>
+    <color name="anaranjado">#D89263</color>
 
     <!-- Colores de Sombras -->
     <color name="sombra_naranja">#DD773333</color>
+
+    <!-- Paleta global del tema -->
+    <color name="surface_dark">#1C1412</color>
+    <color name="surface_variant_dark">#2A1A17</color>
+    <color name="surface_high_dark">#33201C</color>
+    <color name="outline_soft">#6F5448</color>
+    <color name="outline_soft_variant">#4E3A31</color>
+    <color name="on_surface_soft">#F6E8DD</color>
+    <color name="primary_container_dark">#4D2A24</color>
 
 </resources>
