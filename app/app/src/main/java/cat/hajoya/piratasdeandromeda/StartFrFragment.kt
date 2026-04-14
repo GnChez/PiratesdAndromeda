@@ -5,6 +5,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.commit
 import cat.hajoya.piratasdeandromeda.databinding.StartFrBinding
 
 class StartFrFragment : Fragment() {
@@ -24,6 +25,31 @@ class StartFrFragment : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        binding.btnCrear.setOnClickListener {
+            openConfigScreen()
+        }
+
+        binding.btnUnirse.setOnClickListener {
+            openConfigScreen()
+        }
+    }
+
+    private fun openConfigScreen() {
+        parentFragmentManager.commit {
+            setCustomAnimations(
+                android.R.anim.fade_in,
+                android.R.anim.fade_out,
+                android.R.anim.fade_in,
+                android.R.anim.fade_out,
+            )
+            replace(R.id.fragment_container, ConfigPartFrFragment())
+            addToBackStack(null)
+        }
     }
 }
 

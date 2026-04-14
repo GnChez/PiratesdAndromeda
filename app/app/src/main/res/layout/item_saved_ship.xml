@@ -1,27 +1,48 @@
 <?xml version="1.0" encoding="utf-8"?>
 <com.google.android.material.card.MaterialCardView
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/cardSavedShip"
     style="@style/Widget.PiratasDeAndromeda.Card"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_marginBottom="8dp"
     android:clickable="true"
-    android:focusable="true"
-    >
+    android:focusable="true">
 
-    <TextView
-        android:id="@+id/tvShipName"
-        android:layout_width="wrap_content"
+    <androidx.constraintlayout.widget.ConstraintLayout
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_margin="12dp"
-        android:paddingStart="8dp"
-        android:paddingEnd="8dp"
-        android:fontFamily="@font/pirata"
-        android:textAppearance="@style/TextAppearance.Piratas.Section"
-        android:textSize="18sp"
-        tools:text="Nave viajeros locos"
-        xmlns:tools="http://schemas.android.com/tools"/>
+        android:padding="12dp">
+
+        <TextView
+            android:id="@+id/tvShipName"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/pirata"
+            android:textAppearance="@style/TextAppearance.Piratas.Section"
+            android:textSize="18sp"
+            tools:text="Nave viajeros locos"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/btnDeleteShip" />
+
+        <ImageButton
+            android:id="@+id/btnDeleteShip"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:background="@drawable/btn_icon_circle"
+            android:contentDescription="@string/cd_delete_ship"
+            android:padding="0dp"
+            android:scaleType="centerInside"
+            android:src="@drawable/ic_close"
+            app:tint="@color/blanco"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
 </com.google.android.material.card.MaterialCardView>

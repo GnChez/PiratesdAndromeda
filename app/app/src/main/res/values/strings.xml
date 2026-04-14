@@ -51,6 +51,8 @@
     <string name="config_saved_ships">Naves guardadas:</string>
     <string name="config_ship_name_label">Introduce aqui el nombre de tu nave:</string>
     <string name="config_ship_name_hint">Ej: Nave Ron Derramado</string>
+    <string name="config_code_label">Introduce el codigo de la partida:</string>
+    <string name="config_code_hint">Codigo de la partida</string>
     <string name="config_join_button">Unirme</string>
 
     <string name="config_rooms_title">EEEYYY! Cuantos camarotes hay en tu nave?</string>
@@ -61,9 +63,19 @@
     <string name="players_title">A la borda, que la odisea empieza ya!</string>
     <string name="players_code_label">Codigo de partida:</string>
     <string name="players_label">Jugadores a bordo:</string>
+    <string name="players_impostores_label">Numero de impostores</string>
     <string name="players_impostors_hint">Numero de impostores</string>
     <string name="players_start_button">Empezar!</string>
     <string name="players_sample_code">12345</string>
     <string name="add_symbol">+</string>
+    <string name="config_code_label">Introduce codigo de partida:</string>
+
+    <!-- Naves guardadas -->
+    <string name="cd_delete_ship">Eliminar nave guardada</string>
+    <string name="delete_ship_dialog_title">Confirmar borrado</string>
+    <string name="delete_ship_dialog_message">¿Seguro que quieres eliminar &quot;%1$s&quot;?</string>
+    <string name="delete_ship_dialog_confirm">Aceptar</string>
+    <string name="delete_ship_dialog_cancel">Cancelar</string>
+
 
 </resources>
