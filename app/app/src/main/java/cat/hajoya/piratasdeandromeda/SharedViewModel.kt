@@ -10,6 +10,7 @@ import androidx.lifecycle.ViewModel
  */
 class SharedViewModel : ViewModel() {
 	private var nextShipId = 3L
+	private var nextRoomId = 3L
 
 	private val _savedShips = MutableLiveData(
 		listOf(
@@ -18,6 +19,14 @@ class SharedViewModel : ViewModel() {
 		)
 	)
 	val savedShips: LiveData<List<SavedShip>> = _savedShips
+
+	private val _rooms = MutableLiveData(
+		listOf(
+			RoomItem(1L, "Sala de combate"),
+			RoomItem(2L, "Sala de motores"),
+		)
+	)
+	val rooms: LiveData<List<RoomItem>> = _rooms
 
 	fun addSavedShip(name: String) {
 		val trimmedName = name.trim()
@@ -29,5 +38,17 @@ class SharedViewModel : ViewModel() {
 
 	fun deleteSavedShip(shipId: Long) {
 		_savedShips.value = _savedShips.value.orEmpty().filterNot { it.id == shipId }
+	}
+
+	fun addRoom(name: String) {
+		val trimmedName = name.trim()
+		if (trimmedName.isEmpty()) return
+
+		val updatedList = _rooms.value.orEmpty() + RoomItem(nextRoomId++, trimmedName)
+		_rooms.value = updatedList
+	}
+
+	fun deleteRoom(roomId: Long) {
+		_rooms.value = _rooms.value.orEmpty().filterNot { it.id == roomId }
 	}
 }

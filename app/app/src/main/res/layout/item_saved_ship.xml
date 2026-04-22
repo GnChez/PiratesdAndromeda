@@ -1,20 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <com.google.android.material.card.MaterialCardView
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/cardSavedShip"
     style="@style/Widget.PiratasDeAndromeda.Card"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginBottom="8dp"
+    android:layout_marginBottom="10dp"
     android:clickable="true"
     android:focusable="true">
 
     <androidx.constraintlayout.widget.ConstraintLayout
-        xmlns:app="http://schemas.android.com/apk/res-auto"
-        xmlns:tools="http://schemas.android.com/tools"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:padding="12dp">
+        android:paddingHorizontal="10dp"
+        android:paddingVertical="8dp">
 
         <TextView
             android:id="@+id/tvShipName"
@@ -22,23 +23,20 @@
             android:layout_height="wrap_content"
             android:fontFamily="@font/pirata"
             android:textAppearance="@style/TextAppearance.Piratas.Section"
-            android:textSize="18sp"
+            android:maxLines="1"
             tools:text="Nave viajeros locos"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@id/btnDeleteShip" />
+            app:layout_constraintEnd_toStartOf="@id/btnDeleteShip"
+            android:layout_marginStart="15dp"
+             />
 
         <ImageButton
             android:id="@+id/btnDeleteShip"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            android:background="@drawable/btn_icon_circle"
+            style="@style/Widget.PiratasDeAndromeda.DeleteImageButton"
             android:contentDescription="@string/cd_delete_ship"
-            android:padding="0dp"
-            android:scaleType="centerInside"
             android:src="@drawable/ic_close"
-            app:tint="@color/blanco"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent" />

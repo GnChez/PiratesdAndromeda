@@ -68,7 +68,6 @@
     <string name="players_start_button">Empezar!</string>
     <string name="players_sample_code">12345</string>
     <string name="add_symbol">+</string>
-    <string name="config_code_label">Introduce codigo de partida:</string>
 
     <!-- Naves guardadas -->
     <string name="cd_delete_ship">Eliminar nave guardada</string>

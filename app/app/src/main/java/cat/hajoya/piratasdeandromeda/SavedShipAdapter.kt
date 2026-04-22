@@ -30,7 +30,12 @@ class SavedShipAdapter(
 
         fun bind(item: SavedShip) {
             binding.tvShipName.text = item.name
-            binding.btnDeleteShip.setOnClickListener { onDeleteClick(item) }
+            binding.btnDeleteShip.setOnClickListener {
+                val position = bindingAdapterPosition
+                if (position != RecyclerView.NO_POSITION) {
+                    onDeleteClick(getItem(position))
+                }
+            }
         }
     }
 

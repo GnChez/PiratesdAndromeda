@@ -1,4 +1,4 @@
-package cat.hajoya.piratasdeandromeda
+package cat.hajoya.piratasdeandromeda.ui.preparacio
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -9,15 +9,18 @@ import androidx.core.graphics.drawable.toDrawable
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.commit
+import cat.hajoya.piratasdeandromeda.R
 import cat.hajoya.piratasdeandromeda.databinding.ConfigPartFrBinding
+import cat.hajoya.piratasdeandromeda.SavedShip
+import cat.hajoya.piratasdeandromeda.SavedShipAdapter
+import cat.hajoya.piratasdeandromeda.viewmodels.GameViewModel
 
-class ConfigPartFrFragment : Fragment() {
+class StartPartidaFragment : Fragment() {
 
     private var _binding: ConfigPartFrBinding? = null
     private val binding get() = _binding!!
 
-    private val viewModel: SharedViewModel by activityViewModels()
-
+    private val viewModel: GameViewModel by activityViewModels()
     private val adapter = SavedShipAdapter(::confirmDeleteShip)
 
     override fun onCreateView(
@@ -33,12 +36,9 @@ class ConfigPartFrFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         binding.rvSavedShips.adapter = adapter
-
         viewModel.savedShips.observe(viewLifecycleOwner) { ships ->
             adapter.submitList(ships)
         }
-
-        viewModel.savedShips.value?.let(adapter::submitList)
 
         setupListeners()
     }
@@ -50,23 +50,26 @@ class ConfigPartFrFragment : Fragment() {
 
     private fun setupListeners() {
         binding.btnCloseSession.setOnClickListener {
-            parentFragmentManager.popBackStack()
+            requireActivity().finish()
         }
 
         binding.btnCancel.setOnClickListener {
-            parentFragmentManager.popBackStack()
+            requireActivity().finish()
         }
 
         binding.btnCrear.setOnClickListener {
-            openRoomsScreen()
+            val shipName = binding.edShipName.text?.toString().orEmpty()
+            viewModel.addSavedShip(shipName)
+            binding.edShipName.text?.clear()
+            openConfigHabitacionsScreen()
         }
 
         binding.btnUnirme.setOnClickListener {
-            openPlayersScreen()
+            openPersonatgesScreen()
         }
     }
 
-    private fun openRoomsScreen() {
+    private fun openConfigHabitacionsScreen() {
         parentFragmentManager.commit {
             setCustomAnimations(
                 android.R.anim.fade_in,
@@ -74,12 +77,12 @@ class ConfigPartFrFragment : Fragment() {
                 android.R.anim.fade_in,
                 android.R.anim.fade_out,
             )
-            replace(R.id.fragment_container, createFragment("cat.hajoya.piratasdeandromeda.ConfigHabPartFragment"))
+            replace(R.id.fragment_container, ConfigHabitacionsFragment())
             addToBackStack(null)
         }
     }
 
-    private fun openPlayersScreen() {
+    private fun openPersonatgesScreen() {
         parentFragmentManager.commit {
             setCustomAnimations(
                 android.R.anim.fade_in,
@@ -87,13 +90,10 @@ class ConfigPartFrFragment : Fragment() {
                 android.R.anim.fade_in,
                 android.R.anim.fade_out,
             )
-            replace(R.id.fragment_container, createFragment("cat.hajoya.piratasdeandromeda.PersonajesPartidaFragment"))
+            replace(R.id.fragment_container, PersonatgesFragment())
             addToBackStack(null)
         }
     }
-
-    private fun createFragment(className: String): Fragment =
-        Class.forName(className).getDeclaredConstructor().newInstance() as Fragment
 
     private fun confirmDeleteShip(ship: SavedShip) {
         val dialogView = layoutInflater.inflate(R.layout.dialog_delete_ship, null, false)

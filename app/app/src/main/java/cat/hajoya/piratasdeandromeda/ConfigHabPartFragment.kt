@@ -9,36 +9,34 @@ import androidx.core.graphics.drawable.toDrawable
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.commit
-import cat.hajoya.piratasdeandromeda.databinding.ConfigPartFrBinding
+import cat.hajoya.piratasdeandromeda.databinding.ConfigHabPartBinding
 
-class ConfigPartFrFragment : Fragment() {
+class ConfigHabPartFragment : Fragment() {
 
-    private var _binding: ConfigPartFrBinding? = null
+    private var _binding: ConfigHabPartBinding? = null
     private val binding get() = _binding!!
 
     private val viewModel: SharedViewModel by activityViewModels()
-
-    private val adapter = SavedShipAdapter(::confirmDeleteShip)
+    private val adapter = RoomAdapter(::confirmDeleteRoom)
 
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?,
     ): View {
-        _binding = ConfigPartFrBinding.inflate(inflater, container, false)
+        _binding = ConfigHabPartBinding.inflate(inflater, container, false)
         return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        binding.rvSavedShips.adapter = adapter
+        binding.rvRooms.adapter = adapter
 
-        viewModel.savedShips.observe(viewLifecycleOwner) { ships ->
-            adapter.submitList(ships)
+        viewModel.rooms.observe(viewLifecycleOwner) { rooms ->
+            adapter.submitList(rooms)
         }
-
-        viewModel.savedShips.value?.let(adapter::submitList)
+        viewModel.rooms.value?.let(adapter::submitList)
 
         setupListeners()
     }
@@ -49,37 +47,22 @@ class ConfigPartFrFragment : Fragment() {
     }
 
     private fun setupListeners() {
-        binding.btnCloseSession.setOnClickListener {
-            parentFragmentManager.popBackStack()
-        }
-
         binding.btnCancel.setOnClickListener {
             parentFragmentManager.popBackStack()
         }
 
-        binding.btnCrear.setOnClickListener {
-            openRoomsScreen()
+        binding.btnSiguiente.setOnClickListener {
+            openCharactersScreen()
         }
 
-        binding.btnUnirme.setOnClickListener {
-            openPlayersScreen()
-        }
-    }
-
-    private fun openRoomsScreen() {
-        parentFragmentManager.commit {
-            setCustomAnimations(
-                android.R.anim.fade_in,
-                android.R.anim.fade_out,
-                android.R.anim.fade_in,
-                android.R.anim.fade_out,
-            )
-            replace(R.id.fragment_container, createFragment("cat.hajoya.piratasdeandromeda.ConfigHabPartFragment"))
-            addToBackStack(null)
+        binding.btnAddRoom.setOnClickListener {
+            val name = binding.edRoomName.text?.toString().orEmpty()
+            viewModel.addRoom(name)
+            binding.edRoomName.text?.clear()
         }
     }
 
-    private fun openPlayersScreen() {
+    private fun openCharactersScreen() {
         parentFragmentManager.commit {
             setCustomAnimations(
                 android.R.anim.fade_in,
@@ -95,10 +78,10 @@ class ConfigPartFrFragment : Fragment() {
     private fun createFragment(className: String): Fragment =
         Class.forName(className).getDeclaredConstructor().newInstance() as Fragment
 
-    private fun confirmDeleteShip(ship: SavedShip) {
+    private fun confirmDeleteRoom(room: RoomItem) {
         val dialogView = layoutInflater.inflate(R.layout.dialog_delete_ship, null, false)
         dialogView.findViewById<android.widget.TextView>(R.id.tvDeleteDialogMessage).text =
-            getString(R.string.delete_ship_dialog_message, ship.name)
+            getString(R.string.delete_ship_dialog_message, room.name)
 
         val dialog = AlertDialog.Builder(requireContext())
             .setView(dialogView)
@@ -110,13 +93,12 @@ class ConfigPartFrFragment : Fragment() {
             dialog.dismiss()
         }
         dialogView.findViewById<android.widget.Button>(R.id.btnDialogConfirm).setOnClickListener {
-            viewModel.deleteSavedShip(ship.id)
+            viewModel.deleteRoom(room.id)
             dialog.dismiss()
         }
 
         dialog.show()
     }
 }
-
 
 

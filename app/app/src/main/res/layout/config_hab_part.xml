@@ -5,126 +5,102 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="?attr/colorSurface"
+    android:background="@drawable/backgroundbasic"
     android:fillViewport="true">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:padding="16dp">
 
         <TextView
             android:id="@+id/tvHeroTitle"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="20dp"
-            android:layout_marginEnd="20dp"
-            android:layout_marginTop="12dp"
+            android:layout_marginTop="8dp"
             android:text="@string/config_rooms_title"
             android:textAppearance="@style/TextAppearance.Piratas.Title"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent" />
 
-        <!-- Subtitle overlay at bottom of hero -->
         <TextView
             android:id="@+id/tvConfigLabel"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="20dp"
-            android:layout_marginEnd="20dp"
-            android:layout_marginTop="8dp"
+            android:layout_marginTop="16dp"
             android:text="@string/config_rooms_subtitle"
             android:textAppearance="@style/TextAppearance.Piratas.Section"
+            android:textSize="22sp"
             app:layout_constraintTop_toBottomOf="@id/tvHeroTitle"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent" />
 
-        <!-- Divider -->
-        <View
-            android:id="@+id/dividerHero"
-            android:layout_width="0dp"
-            android:layout_height="1dp"
-            android:background="?attr/colorOutlineVariant"
-            app:layout_constraintTop_toBottomOf="@id/tvConfigLabel"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent" />
-
-        <!-- Rooms RecyclerView -->
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/rvRooms"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="20dp"
-            android:layout_marginEnd="20dp"
             android:layout_marginTop="16dp"
             android:nestedScrollingEnabled="false"
             android:clipToPadding="false"
             tools:listitem="@layout/item_room"
             tools:itemCount="3"
-            app:layout_constraintTop_toBottomOf="@id/dividerHero"
+            app:layout_constraintTop_toBottomOf="@id/tvConfigLabel"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent" />
+            app:layout_constraintEnd_toEndOf="parent"/>
 
-        <!-- Add room: input + "+" button -->
-        <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/tilRoomName"
-            style="@style/Widget.PiratasDeAndromeda.TextInputLayout"
+        <EditText
+            android:id="@+id/edRoomName"
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="20dp"
+            android:layout_height="48dp"
             android:layout_marginTop="12dp"
+            android:background="@drawable/edittext"
             android:hint="@string/config_room_name_hint"
+            android:inputType="textCapWords"
+            android:autofillHints="name"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
+            android:textColor="@color/anaranjado"
+            android:textColorHint="@color/anaranjado"
+            android:textSize="16sp"
             app:layout_constraintTop_toBottomOf="@id/rvRooms"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toStartOf="@id/btnAddRoom">
+            app:layout_constraintEnd_toStartOf="@id/btnAddRoom" />
 
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/edRoomName"
-                style="@style/Widget.PiratasDeAndromeda.TextInputEditText"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:inputType="textCapWords"
-                android:imeOptions="actionDone" />
-
-        </com.google.android.material.textfield.TextInputLayout>
-
-        <com.google.android.material.button.MaterialButton
+        <Button
             android:id="@+id/btnAddRoom"
-            style="@style/Widget.PiratasDeAndromeda.CircleIconButton"
-            android:layout_width="48dp"
-            android:layout_height="0dp"
-            android:layout_marginStart="12dp"
-            android:layout_marginEnd="20dp"
-            android:padding="0dp"
-            android:minWidth="0dp"
-            android:minHeight="0dp"
-            android:text="@string/add_symbol"
-            android:textAppearance="@style/TextAppearance.Piratas.Section"
-            android:contentDescription="@string/cd_add_room"
-            app:layout_constraintTop_toTopOf="@id/tilRoomName"
-            app:layout_constraintBottom_toBottomOf="@id/tilRoomName"
-            app:layout_constraintStart_toEndOf="@id/tilRoomName"
-            app:layout_constraintEnd_toEndOf="parent" />
-
-        <!-- Bottom actions: X + Siguiente -->
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnCancel"
-            style="@style/Widget.PiratasDeAndromeda.CircleIconButton"
+            style="@style/Widget.PiratasDeAndromeda.ClassicButton"
             android:layout_width="48dp"
             android:layout_height="48dp"
-            android:layout_marginStart="20dp"
-            android:layout_marginTop="24dp"
-            android:layout_marginBottom="32dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginEnd="0dp"
+            android:background="@drawable/btn_icon_circle"
+            android:backgroundTint="@null"
+            app:backgroundTint="@null"
             android:padding="0dp"
-            android:minWidth="0dp"
-            android:minHeight="0dp"
-            app:icon="@drawable/ic_close"
-            app:iconSize="20dp"
-            app:iconPadding="0dp"
-            app:iconGravity="textStart"
+            android:includeFontPadding="false"
+            android:gravity="center"
+            android:text="@string/add_symbol"
+            android:contentDescription="@string/cd_add_room"
+            android:textColor="@color/blanco"
+            android:textSize="28sp"
+            app:layout_constraintTop_toTopOf="@id/edRoomName"
+            app:layout_constraintBottom_toBottomOf="@id/edRoomName"
+            app:layout_constraintStart_toEndOf="@id/edRoomName"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+        <ImageButton
+            android:id="@+id/btnCancel"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_marginTop="20dp"
+            android:layout_marginBottom="24dp"
+            android:background="@drawable/btn_icon_circle"
+            android:src="@drawable/ic_close"
+            app:tint="@color/blanco"
+            android:padding="0dp"
+            android:scaleType="centerInside"
             android:contentDescription="@string/cd_cancel"
-            app:shapeAppearance="@style/ShapeAppearance.App.CircleImageView"
-            app:layout_constraintTop_toBottomOf="@id/tilRoomName"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintBottom_toBottomOf="parent" />
 
@@ -134,15 +110,13 @@
             android:layout_width="0dp"
             android:layout_height="48dp"
             android:layout_marginStart="16dp"
-            android:layout_marginEnd="20dp"
-            android:layout_marginTop="24dp"
-            android:layout_marginBottom="32dp"
+            android:layout_marginEnd="0dp"
+            android:layout_marginTop="20dp"
+            android:layout_marginBottom="24dp"
             android:text="@string/config_next_button"
-            app:layout_constraintTop_toBottomOf="@id/tilRoomName"
             app:layout_constraintStart_toEndOf="@id/btnCancel"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintBaseline_toBaselineOf="@id/btnCancel" />
+            app:layout_constraintBottom_toBottomOf="parent" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

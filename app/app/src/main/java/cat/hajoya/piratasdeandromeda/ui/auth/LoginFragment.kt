@@ -1,21 +1,20 @@
-package cat.hajoya.piratasdeandromeda
+package cat.hajoya.piratasdeandromeda.ui.auth
 
-import androidx.fragment.app.Fragment
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import cat.hajoya.piratasdeandromeda.R
 import cat.hajoya.piratasdeandromeda.databinding.IniciBinding
-import kotlin.getValue
+import cat.hajoya.piratasdeandromeda.viewmodels.AuthViewModel
 
-
-class IniciFragment: Fragment() {
+class LoginFragment : Fragment() {
     private var _binding: IniciBinding? = null
-
     private val binding get() = _binding!!
 
-    private val viewModel: SharedViewModel by activityViewModels()
+    private val viewModel: AuthViewModel by activityViewModels()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -28,7 +27,6 @@ class IniciFragment: Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
         setupListeners()
         observeViewModel()
     }
@@ -39,10 +37,10 @@ class IniciFragment: Fragment() {
     }
 
     private fun observeViewModel() {
-
+        // Observar cambios de autenticación si es necesario
     }
 
-    private fun setupListeners(){
+    private fun setupListeners() {
         binding.tvSignUp.setOnClickListener {
             parentFragmentManager.beginTransaction()
                 .replace(R.id.fragment_container, RegisterFragment())
@@ -51,11 +49,12 @@ class IniciFragment: Fragment() {
         }
 
         binding.btnEntra.setOnClickListener {
-            parentFragmentManager.beginTransaction()
-                .replace(R.id.fragment_container, ConfigPartFrFragment())
-                .addToBackStack(null)
-                .commit()
+            val usuari = binding.etUsuari.text?.toString() ?: ""
+            val contrasenya = binding.etContrasenya.text?.toString() ?: ""
+            viewModel.login(usuari, contrasenya)
         }
-
     }
 }
+
+
+
