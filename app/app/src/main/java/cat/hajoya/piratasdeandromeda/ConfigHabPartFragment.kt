@@ -70,13 +70,11 @@ class ConfigHabPartFragment : Fragment() {
                 android.R.anim.fade_in,
                 android.R.anim.fade_out,
             )
-            replace(R.id.fragment_container, createFragment("cat.hajoya.piratasdeandromeda.PersonajesPartidaFragment"))
+            replace(R.id.fragment_container, PersonajesPartidaFragment())
             addToBackStack(null)
         }
     }
 
-    private fun createFragment(className: String): Fragment =
-        Class.forName(className).getDeclaredConstructor().newInstance() as Fragment
 
     private fun confirmDeleteRoom(room: RoomItem) {
         val dialogView = layoutInflater.inflate(R.layout.dialog_delete_ship, null, false)

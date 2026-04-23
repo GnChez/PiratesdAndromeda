@@ -27,6 +27,7 @@ class AuthActivity : AppCompatActivity() {
 
         if (savedInstanceState == null) {
             supportFragmentManager.commit {
+                setReorderingAllowed(true)
                 replace(R.id.fragment_container, LoginFragment())
             }
         }

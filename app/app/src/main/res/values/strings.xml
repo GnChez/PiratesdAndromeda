@@ -76,5 +76,37 @@
     <string name="delete_ship_dialog_confirm">Aceptar</string>
     <string name="delete_ship_dialog_cancel">Cancelar</string>
 
+    <!-- Settings -->
+    <string name="settings_title">Configuració</string>
+    <string name="cd_back">Tornar enrere</string>
+
+    <!-- Secció: Perfil -->
+    <string name="settings_section_profile">Perfil</string>
+    <string name="settings_username_label">Nom d\'usuari</string>
+    <string name="settings_username_hint">Escriu el teu nom…</string>
+    <string name="settings_email_label">Correu electrònic</string>
+    <string name="settings_email_hint">exemple@correu.com</string>
+    <string name="settings_password_label">Contrasenya</string>
+    <string name="settings_password_hint">Nova contrasenya…</string>
+    <string name="settings_save_button">Desar</string>
+
+    <!-- Secció: Preferències -->
+    <string name="settings_section_prefs">Preferències</string>
+    <string name="settings_language_label">Idioma</string>
+    <string name="settings_language_default">Català</string>
+    <string name="settings_language_cd">Canviar idioma</string>
+    <string name="settings_dark_mode_label">Mode fosc</string>
+    <string name="settings_dark_mode_cd">Activar o desactivar mode fosc</string>
+
+    <!-- Secció: Compte -->
+    <string name="settings_section_account">Compte</string>
+    <string name="settings_delete_account_button">Eliminar compte</string>
+
+    <string name="home_welcome_title">Bienvenido</string>
+    <string name="home_recent_games_label">Partidas recientes</string>
+    <string name="home_find_game_label">Encontrar partida</string>
+    <string name="home_game_code_hint">Código de partida</string>
+    <string name="home_search_button">Buscar</string>
+    <string name="home_start_game_button">Empezar nueva partida</string>
 
 </resources>

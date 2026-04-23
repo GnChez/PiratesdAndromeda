@@ -10,6 +10,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.commit
 import cat.hajoya.piratasdeandromeda.databinding.ConfigPartFrBinding
+import cat.hajoya.piratasdeandromeda.ui.preparacio.SettingsFragment
 
 class ConfigPartFrFragment : Fragment() {
 
@@ -50,7 +51,7 @@ class ConfigPartFrFragment : Fragment() {
 
     private fun setupListeners() {
         binding.btnCloseSession.setOnClickListener {
-            parentFragmentManager.popBackStack()
+            openSettingsScreen()
         }
 
         binding.btnCancel.setOnClickListener {
@@ -66,6 +67,19 @@ class ConfigPartFrFragment : Fragment() {
         }
     }
 
+    private fun openSettingsScreen() {
+        parentFragmentManager.commit {
+            setCustomAnimations(
+                android.R.anim.fade_in,
+                android.R.anim.fade_out,
+                android.R.anim.fade_in,
+                android.R.anim.fade_out,
+            )
+            replace(R.id.fragment_container, SettingsFragment())
+            addToBackStack(null)
+        }
+    }
+
     private fun openRoomsScreen() {
         parentFragmentManager.commit {
             setCustomAnimations(
@@ -74,7 +88,7 @@ class ConfigPartFrFragment : Fragment() {
                 android.R.anim.fade_in,
                 android.R.anim.fade_out,
             )
-            replace(R.id.fragment_container, createFragment("cat.hajoya.piratasdeandromeda.ConfigHabPartFragment"))
+            replace(R.id.fragment_container, ConfigHabPartFragment())
             addToBackStack(null)
         }
     }
@@ -87,13 +101,11 @@ class ConfigPartFrFragment : Fragment() {
                 android.R.anim.fade_in,
                 android.R.anim.fade_out,
             )
-            replace(R.id.fragment_container, createFragment("cat.hajoya.piratasdeandromeda.PersonajesPartidaFragment"))
+            replace(R.id.fragment_container, PersonajesPartidaFragment())
             addToBackStack(null)
         }
     }
 
-    private fun createFragment(className: String): Fragment =
-        Class.forName(className).getDeclaredConstructor().newInstance() as Fragment
 
     private fun confirmDeleteShip(ship: SavedShip) {
         val dialogView = layoutInflater.inflate(R.layout.dialog_delete_ship, null, false)

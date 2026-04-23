@@ -2,7 +2,6 @@ package cat.hajoya.piratasdeandromeda.ui.admin
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
-import androidx.fragment.app.Fragment
 import androidx.fragment.app.commit
 import androidx.lifecycle.ViewModelProvider
 import cat.hajoya.piratasdeandromeda.R
@@ -23,16 +22,11 @@ class AdminActivity : AppCompatActivity() {
 
         if (savedInstanceState == null) {
             supportFragmentManager.commit {
-                replace(
-                    R.id.fragment_container,
-                    createFragment("cat.hajoya.piratasdeandromeda.ui.admin.InicioAdminFragment")
-                )
+                setReorderingAllowed(true)
+                replace(R.id.fragment_container, InicioAdminFragment())
             }
         }
     }
-
-    private fun createFragment(className: String): Fragment =
-        Class.forName(className).getDeclaredConstructor().newInstance() as Fragment
 }
 
 

@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/btnclaro"
+    android:orientation="vertical"
+    android:padding="20dp">
+
+    <TextView
+        android:id="@+id/tvPlayerInfoTitle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:fontFamily="@font/pirata"
+        android:text="Informacion del jugador"
+        android:textColor="@color/blanco"
+        android:textSize="24sp" />
+
+    <ImageView
+        android:id="@+id/ivPlayerProfile"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="12dp"
+        android:background="@drawable/btn_icon_circle"
+        android:contentDescription="Imagen de perfil del jugador"
+        android:padding="16dp"
+        android:src="@drawable/perfil"
+        app:tint="@color/blanco" />
+
+    <TextView
+        android:id="@+id/tvPlayerInfoName"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:fontFamily="@font/pirata"
+        android:textColor="@color/blanco"
+        android:textSize="20sp" />
+
+    <TextView
+        android:id="@+id/tvPlayerInfoEmail"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:fontFamily="@font/pirata"
+        android:textColor="@color/blanco"
+        android:textSize="18sp" />
+
+    <Button
+        android:id="@+id/btnClosePlayerInfo"
+        style="@style/Widget.PiratasDeAndromeda.DarkButton"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:layout_marginTop="20dp"
+        android:text="Cerrar" />
+
+</LinearLayout>
+
+
+

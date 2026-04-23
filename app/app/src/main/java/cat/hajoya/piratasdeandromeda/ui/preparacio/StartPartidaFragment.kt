@@ -50,7 +50,7 @@ class StartPartidaFragment : Fragment() {
 
     private fun setupListeners() {
         binding.btnCloseSession.setOnClickListener {
-            requireActivity().finish()
+            openSettingsScreen()
         }
 
         binding.btnCancel.setOnClickListener {
@@ -66,6 +66,19 @@ class StartPartidaFragment : Fragment() {
 
         binding.btnUnirme.setOnClickListener {
             openPersonatgesScreen()
+        }
+    }
+
+    private fun openSettingsScreen() {
+        parentFragmentManager.commit {
+            setCustomAnimations(
+                android.R.anim.fade_in,
+                android.R.anim.fade_out,
+                android.R.anim.fade_in,
+                android.R.anim.fade_out,
+            )
+            replace(R.id.fragment_container, SettingsFragment())
+            addToBackStack(null)
         }
     }
 

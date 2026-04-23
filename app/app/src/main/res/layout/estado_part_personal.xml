@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/background_pirata_panel"
+    android:padding="16dp">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:text="Estado de la partida"
+        android:textAppearance="@style/TextAppearance.Piratas.Title"
+        tools:text="Estado de la partida" />
+
+    <!-- ── BOTÓN MENÚ (estrella) ── -->
+
+    <ImageButton
+        android:id="@+id/btnMenu"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="8dp"
+        android:background="@drawable/btn_icon_circle"
+        android:contentDescription="Abrir menu de partida"
+        android:padding="10dp"
+        android:scaleType="centerInside"
+        android:src="@drawable/ic_star"
+        app:tint="@color/blanco"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <!-- ── CÓDIGO DE PARTIDA ── -->
+
+    <TextView
+        android:id="@+id/tvGameCode"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="80dp"
+        android:text="Partida:"
+        android:textAppearance="@style/TextAppearance.Piratas.Section"
+        android:textSize="22sp"
+        tools:text="Partida: 000HHH000"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <!-- ── TIEMPO RESTANTE ── -->
+
+    <TextView
+        android:id="@+id/tvTimeRemaining"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:text="Tiempo restante:"
+        android:textAppearance="@style/TextAppearance.Piratas.Section"
+        android:textSize="22sp"
+        tools:text="Tiempo restante: 00:00"
+        app:layout_constraintTop_toBottomOf="@id/tvGameCode"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rvPlayersProgress"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginBottom="16dp"
+        android:clipToPadding="false"
+        android:importantForAccessibility="yes"
+        android:contentDescription="Lista de progreso de jugadores"
+        app:layout_constraintTop_toBottomOf="@id/tvTimeRemaining"
+        app:layout_constraintBottom_toTopOf="@id/btnClose"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <!-- ── BOTÓN CERRAR (X) ── -->
+
+    <ImageButton
+        android:id="@+id/btnClose"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_marginBottom="8dp"
+        android:background="@drawable/btn_icon_circle"
+        android:contentDescription="Volver a la pantalla anterior"
+        android:padding="10dp"
+        android:scaleType="centerInside"
+        android:src="@drawable/ic_close"
+        app:tint="@color/blanco"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

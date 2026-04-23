@@ -12,10 +12,10 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="270dp"
         android:layout_height="wrap_content"
-        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginBottom="60dp"
-        android:paddingEnd="30dp">
+        android:layout_marginTop="330dp"
+        android:paddingHorizontal="30dp">
 
 
         <TextView
@@ -27,7 +27,7 @@
             app:layout_constraintTop_toTopOf="parent"
             android:text="@string/login"
             android:textColor="@color/anaranjado"
-            android:textSize="60sp" />
+            android:textSize="50sp" />
 
 
         <TextView
@@ -38,11 +38,12 @@
             android:layout_gravity="start"
             android:text="@string/signUp_subrallado"
             android:contentDescription="@string/go_to_register_cd"
-            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/tvLogin"
             app:layout_constraintTop_toTopOf="parent"
             android:textColor="@color/sombra_naranja"
             android:layout_marginTop="12dp"
-            android:textSize="40sp" />
+            android:layout_marginStart="15dp"
+            android:textSize="30sp" />
 
     <LinearLayout
         android:id="@+id/llLoginContainer"

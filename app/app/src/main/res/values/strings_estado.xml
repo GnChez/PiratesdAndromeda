@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="personal_game_state_title">Estado de la partida</string>
+    <string name="cd_menu">Abrir menu de partida</string>
+    <string name="cd_close">Volver a la pantalla anterior</string>
+    <string name="game_code_label">Partida:</string>
+    <string name="game_code_value_format">Partida: %1$s</string>
+    <string name="game_time_label">Tiempo restante:</string>
+    <string name="game_time_value_format">Tiempo restante: %1$s</string>
+    <string name="players_progress_list_cd">Lista de progreso de jugadores</string>
+    <string name="player_percent_format">%1$d%%</string>
+    <string name="player_info_short">i</string>
+    <string name="player_info_button_default_cd">Ver informacion del jugador</string>
+    <string name="player_info_button_cd">Ver informacion de %1$s</string>
+    <string name="player_info_title">Informacion del jugador</string>
+    <string name="player_profile_default_cd">Imagen de perfil del jugador</string>
+    <string name="player_profile_cd">Imagen de perfil de %1$s</string>
+    <string name="player_info_name_value">Nombre: %1$s</string>
+    <string name="player_info_email_value">Correo: %1$s</string>
+    <string name="player_info_close">Cerrar</string>
+</resources>
+

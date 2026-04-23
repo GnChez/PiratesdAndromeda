@@ -2,6 +2,7 @@ package cat.hajoya.piratasdeandromeda
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import androidx.fragment.app.commit
 import cat.hajoya.piratasdeandromeda.databinding.ActivityMainBinding
 class MainActivity : AppCompatActivity() {
 
@@ -13,9 +14,10 @@ class MainActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         if (savedInstanceState == null) {
-            supportFragmentManager.beginTransaction()
-                .replace(R.id.fragment_container, IniciFragment())
-                .commit()
+            supportFragmentManager.commit {
+                setReorderingAllowed(true)
+                replace(R.id.fragment_container, IniciFragment())
+            }
         }
     }
 }

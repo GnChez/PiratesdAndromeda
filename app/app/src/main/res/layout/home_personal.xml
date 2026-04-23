@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.core.widget.NestedScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/backgroundbasic"
+    android:fillViewport="true">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="16dp">
+
+        <!-- ── TÍTULO BIENVENIDA ── -->
+
+        <TextView
+            android:id="@+id/tvWelcome"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="40dp"
+            android:text="@string/home_welcome_title"
+            android:textAppearance="@style/TextAppearance.Piratas.Title"
+            tools:text="Ya estas de vuelta!"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+        <!-- ── JUEGOS RECIENTES ── -->
+
+        <TextView
+            android:id="@+id/tvRecentLabel"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="48dp"
+            android:text="@string/home_recent_games_label"
+            android:textAppearance="@style/TextAppearance.Piratas.Section"
+            android:textSize="16sp"
+            tools:text="Juegos recientes:"
+            app:layout_constraintTop_toBottomOf="@id/tvWelcome"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+        <TextView
+            android:id="@+id/tvRecentGame1"
+            android:layout_width="0dp"
+            android:layout_height="44dp"
+            android:layout_marginTop="10dp"
+            android:background="@drawable/edittext"
+            android:gravity="center_vertical"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
+            android:textColor="@color/anaranjado"
+            android:textSize="14sp"
+            tools:text="000HHH000"
+            app:layout_constraintTop_toBottomOf="@id/tvRecentLabel"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+        <TextView
+            android:id="@+id/tvRecentGame2"
+            android:layout_width="0dp"
+            android:layout_height="44dp"
+            android:layout_marginTop="8dp"
+            android:background="@drawable/edittext"
+            android:gravity="center_vertical"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
+            android:textColor="@color/anaranjado"
+            android:textSize="14sp"
+            tools:text="111PPP111"
+            app:layout_constraintTop_toBottomOf="@id/tvRecentGame1"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+        <!-- ── ENCONTRAR PARTIDA ── -->
+
+        <TextView
+            android:id="@+id/tvFindGameLabel"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="28dp"
+            android:text="@string/home_find_game_label"
+            android:textAppearance="@style/TextAppearance.Piratas.Section"
+            android:textSize="18sp"
+            tools:text="Encontrar Partida"
+            app:layout_constraintTop_toBottomOf="@id/tvRecentGame2"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+        <EditText
+            android:id="@+id/edGameCode"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:layout_marginTop="10dp"
+            android:background="@drawable/edittext"
+            android:hint="@string/home_game_code_hint"
+            android:inputType="textCapCharacters"
+            android:autofillHints="no"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
+            android:textColor="@color/anaranjado"
+            android:textColorHint="@color/anaranjado"
+            android:textSize="16sp"
+            tools:text="Codigo partida"
+            app:layout_constraintTop_toBottomOf="@id/tvFindGameLabel"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/btnSearch" />
+
+        <Button
+            android:id="@+id/btnSearch"
+            android:layout_width="wrap_content"
+            android:layout_height="0dp"
+            android:layout_marginStart="8dp"
+            android:text="@string/home_search_button"
+            android:background="@drawable/btnclaro"
+            android:backgroundTint="@null"
+            app:backgroundTint="@null"
+            android:gravity="center"
+            android:fontFamily="@font/pirata"
+            android:textColor="@color/blanco"
+            android:textSize="18sp"
+            tools:text="Buscar"
+            app:layout_constraintTop_toTopOf="@id/edGameCode"
+            app:layout_constraintBottom_toBottomOf="@id/edGameCode"
+            app:layout_constraintStart_toEndOf="@id/edGameCode"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+        <!-- ── COMENZAR PARTIDA ── -->
+
+        <Button
+            android:id="@+id/btnStartGame"
+            android:layout_width="0dp"
+            android:layout_height="56dp"
+            android:layout_marginTop="32dp"
+            android:layout_marginBottom="32dp"
+            android:text="@string/home_start_game_button"
+            android:background="@drawable/btnclaro"
+            android:backgroundTint="@null"
+            app:backgroundTint="@null"
+            android:gravity="center"
+            android:fontFamily="@font/pirata"
+            android:textColor="@color/blanco"
+            android:textSize="20sp"
+            tools:text="Comenzar partida"
+            app:layout_constraintTop_toBottomOf="@id/edGameCode"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</androidx.core.widget.NestedScrollView>

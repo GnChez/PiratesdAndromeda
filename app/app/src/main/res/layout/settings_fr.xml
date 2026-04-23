@@ -1,0 +1,316 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.core.widget.NestedScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/backgroundbasic"
+    android:fillViewport="true">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="16dp">
+
+        <!-- ── HEADER ── -->
+
+        <ImageButton
+            android:id="@+id/btnBack"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_marginTop="8dp"
+            android:background="@drawable/btn_icon_circle"
+            android:contentDescription="@string/cd_back"
+            android:padding="10dp"
+            android:scaleType="centerInside"
+            android:src="@drawable/ic_back"
+            app:tint="@color/blanco"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent" />
+
+        <TextView
+            android:id="@+id/tvSettingsTitle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:layout_marginStart="12dp"
+            android:layout_marginEnd="12dp"
+            android:text="@string/settings_title"
+            android:textAppearance="@style/TextAppearance.Piratas.Title"
+            android:gravity="center"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"/>
+
+
+        <!-- ── SECCIÓN: PERFIL ── -->
+
+        <TextView
+            android:id="@+id/tvSectionPerfil"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:text="@string/settings_section_profile"
+            android:textAppearance="@style/TextAppearance.Piratas.Section"
+            app:layout_constraintTop_toBottomOf="@id/btnBack"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+        <!-- Nom d'usuari -->
+
+        <TextView
+            android:id="@+id/tvUsernameLabel"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:text="@string/settings_username_label"
+            android:textAppearance="@style/TextAppearance.Piratas.Section"
+            android:textSize="14sp"
+            app:layout_constraintTop_toBottomOf="@id/tvSectionPerfil"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+        <EditText
+            android:id="@+id/edUsername"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:layout_marginTop="6dp"
+            android:background="@drawable/edittext"
+            android:hint="@string/settings_username_hint"
+            android:inputType="textPersonName"
+            android:autofillHints="username"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
+            android:textColor="@color/anaranjado"
+            android:textColorHint="@color/anaranjado"
+            android:textSize="16sp"
+            tools:text="Capità Nemo"
+            app:layout_constraintTop_toBottomOf="@id/tvUsernameLabel"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/btnSaveUsername" />
+
+        <Button
+            android:id="@+id/btnSaveUsername"
+            android:layout_width="wrap_content"
+            android:layout_height="0dp"
+            android:layout_marginStart="8dp"
+            android:text="@string/settings_save_button"
+            android:background="@drawable/btnclaro"
+            android:backgroundTint="@null"
+            app:backgroundTint="@null"
+            android:gravity="center"
+            android:fontFamily="@font/pirata"
+            android:textColor="@color/blanco"
+            android:textSize="18sp"
+            app:layout_constraintTop_toTopOf="@id/edUsername"
+            app:layout_constraintBottom_toBottomOf="@id/edUsername"
+            app:layout_constraintStart_toEndOf="@id/edUsername"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+        <!-- Correu electrònic -->
+
+        <TextView
+            android:id="@+id/tvEmailLabel"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:text="@string/settings_email_label"
+            android:textAppearance="@style/TextAppearance.Piratas.Section"
+            android:textSize="14sp"
+            app:layout_constraintTop_toBottomOf="@id/edUsername"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+        <EditText
+            android:id="@+id/edEmail"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:layout_marginTop="6dp"
+            android:background="@drawable/edittext"
+            android:hint="@string/settings_email_hint"
+            android:inputType="textEmailAddress"
+            android:autofillHints="emailAddress"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
+            android:textColor="@color/anaranjado"
+            android:textColorHint="@color/anaranjado"
+            android:textSize="16sp"
+            tools:text="capita@andromeda.com"
+            app:layout_constraintTop_toBottomOf="@id/tvEmailLabel"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/btnSaveEmail" />
+
+        <Button
+            android:id="@+id/btnSaveEmail"
+            android:layout_width="wrap_content"
+            android:layout_height="0dp"
+            android:layout_marginStart="8dp"
+            android:text="@string/settings_save_button"
+            android:background="@drawable/btnclaro"
+            android:backgroundTint="@null"
+            app:backgroundTint="@null"
+            android:gravity="center"
+            android:fontFamily="@font/pirata"
+            android:textColor="@color/blanco"
+            android:textSize="18sp"
+            app:layout_constraintTop_toTopOf="@id/edEmail"
+            app:layout_constraintBottom_toBottomOf="@id/edEmail"
+            app:layout_constraintStart_toEndOf="@id/edEmail"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+        <!-- Contrasenya -->
+
+        <TextView
+            android:id="@+id/tvPasswordLabel"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:text="@string/settings_password_label"
+            android:textAppearance="@style/TextAppearance.Piratas.Section"
+            android:textSize="14sp"
+            app:layout_constraintTop_toBottomOf="@id/edEmail"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+        <EditText
+            android:id="@+id/edPassword"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:layout_marginTop="6dp"
+            android:background="@drawable/edittext"
+            android:hint="@string/settings_password_hint"
+            android:inputType="textPassword"
+            android:autofillHints="newPassword"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
+            android:textColor="@color/anaranjado"
+            android:textColorHint="@color/anaranjado"
+            android:textSize="16sp"
+            app:layout_constraintTop_toBottomOf="@id/tvPasswordLabel"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/btnSavePassword" />
+
+        <Button
+            android:id="@+id/btnSavePassword"
+            android:layout_width="wrap_content"
+            android:layout_height="0dp"
+            android:layout_marginStart="8dp"
+            android:text="@string/settings_save_button"
+            android:background="@drawable/btnclaro"
+            android:backgroundTint="@null"
+            app:backgroundTint="@null"
+            android:gravity="center"
+            android:fontFamily="@font/pirata"
+            android:textColor="@color/blanco"
+            android:textSize="18sp"
+            app:layout_constraintTop_toTopOf="@id/edPassword"
+            app:layout_constraintBottom_toBottomOf="@id/edPassword"
+            app:layout_constraintStart_toEndOf="@id/edPassword"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+        <!-- ── SECCIÓN: PREFERÈNCIES ── -->
+
+        <TextView
+            android:id="@+id/tvSectionPrefs"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="28dp"
+            android:text="@string/settings_section_prefs"
+            android:textAppearance="@style/TextAppearance.Piratas.Section"
+            app:layout_constraintTop_toBottomOf="@id/edPassword"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+        <!-- Idioma -->
+
+        <TextView
+            android:id="@+id/tvLanguageLabel"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="14dp"
+            android:text="@string/settings_language_label"
+            android:textAppearance="@style/TextAppearance.Piratas.Section"
+            android:textSize="16sp"
+            app:layout_constraintTop_toBottomOf="@id/tvSectionPrefs"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/tvLanguageValue"
+            app:layout_constraintBottom_toBottomOf="@id/tvLanguageValue" />
+
+        <TextView
+            android:id="@+id/tvLanguageValue"
+            android:layout_width="wrap_content"
+            android:layout_height="48dp"
+            android:layout_marginTop="8dp"
+            android:gravity="center_vertical"
+            android:text="@string/settings_language_default"
+            android:textColor="@color/anaranjado"
+            android:textSize="16sp"
+            android:paddingEnd="4dp"
+            tools:text="Català"
+            app:layout_constraintTop_toBottomOf="@id/tvSectionPrefs"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@id/tvLanguageLabel" />
+
+
+        <!-- Mode fosc -->
+
+        <TextView
+            android:id="@+id/tvDarkModeLabel"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:text="@string/settings_dark_mode_label"
+            android:textAppearance="@style/TextAppearance.Piratas.Section"
+            android:textSize="16sp"
+            app:layout_constraintTop_toBottomOf="@id/tvLanguageValue"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/switchDarkMode"
+            app:layout_constraintBottom_toBottomOf="@id/switchDarkMode" />
+
+        <androidx.appcompat.widget.SwitchCompat
+            android:id="@+id/switchDarkMode"
+            android:layout_width="wrap_content"
+            android:layout_height="48dp"
+            android:layout_marginTop="8dp"
+            android:contentDescription="@string/settings_dark_mode_cd"
+            android:thumbTint="@color/anaranjado"
+            android:trackTint="@color/anaranjado"
+            app:layout_constraintTop_toBottomOf="@id/tvLanguageValue"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+        <!-- ── SECCIÓN: COMPTE ── -->
+
+        <TextView
+            android:id="@+id/tvSectionAccount"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="28dp"
+            android:text="@string/settings_section_account"
+            android:textAppearance="@style/TextAppearance.Piratas.Section"
+            app:layout_constraintTop_toBottomOf="@id/switchDarkMode"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+        <Button
+            android:id="@+id/btnDeleteAccount"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:layout_marginTop="12dp"
+            android:layout_marginBottom="32dp"
+            android:text="@string/settings_delete_account_button"
+            android:background="@drawable/btnclaro"
+            android:backgroundTint="@null"
+            app:backgroundTint="@null"
+            android:gravity="center"
+            android:fontFamily="@font/pirata"
+            android:textColor="@color/blanco"
+            android:textSize="20sp"
+            app:layout_constraintTop_toBottomOf="@id/tvSectionAccount"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</androidx.core.widget.NestedScrollView>

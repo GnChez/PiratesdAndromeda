@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="CopilotDiffPersistence">
+    <option name="pendingDiffs">
+      <map>
+        <entry key="$PROJECT_DIR$/app/src/main/java/cat/hajoya/piratasdeandromeda/ui/preparacio/SettingsFragment.kt">
+          <value>
+            <PendingDiffInfo>
+              <option name="filePath" value="$PROJECT_DIR$/app/src/main/java/cat/hajoya/piratasdeandromeda/ui/preparacio/SettingsFragment.kt" />
+              <option name="updatedContent" value="package cat.hajoya.piratasdeandromeda.ui.preparacio&#10;&#10;import android.content.Intent&#10;import android.os.Bundle&#10;import android.view.LayoutInflater&#10;import android.view.View&#10;import android.view.ViewGroup&#10;import androidx.fragment.app.Fragment&#10;import cat.hajoya.piratasdeandromeda.databinding.SettingsFrBinding&#10;import cat.hajoya.piratasdeandromeda.ui.auth.AuthActivity&#10;&#10;class SettingsFragment : Fragment() {&#10;&#10;    private var _binding: SettingsFrBinding? = null&#10;    private val binding get() = _binding!!&#10;&#10;    override fun onCreateView(&#10;        inflater: LayoutInflater,&#10;        container: ViewGroup?,&#10;        savedInstanceState: Bundle?,&#10;    ): View {&#10;        _binding = SettingsFrBinding.inflate(inflater, container, false)&#10;        return binding.root&#10;    }&#10;&#10;    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {&#10;        super.onViewCreated(view, savedInstanceState)&#10;        setupListeners()&#10;    }&#10;&#10;    override fun onDestroyView() {&#10;        super.onDestroyView()&#10;        _binding = null&#10;    }&#10;&#10;    private fun setupListeners() {&#10;        binding.btnBack.setOnClickListener {&#10;            parentFragmentManager.popBackStack()&#10;        }&#10;&#10;        binding.btnDeleteAccount.setOnClickListener {&#10;            val intent = Intent(requireContext(), AuthActivity::class.java).apply {&#10;                flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK&#10;            }&#10;            startActivity(intent)&#10;            requireActivity().finish()&#10;        }&#10;    }&#10;}&#10;" />
+            </PendingDiffInfo>
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+</project>
