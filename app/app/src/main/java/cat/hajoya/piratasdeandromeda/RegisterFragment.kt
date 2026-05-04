@@ -6,6 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import cat.hajoya.piratasdeandromeda.databinding.RegisterBinding
+import cat.hajoya.piratasdeandromeda.ui.preparacio.StartPartidaFragment
 
 class RegisterFragment: Fragment() {
 
@@ -45,11 +46,12 @@ class RegisterFragment: Fragment() {
 
         binding.btnRegistrate.setOnClickListener {
             parentFragmentManager.beginTransaction()
-                .replace(R.id.fragment_container, ConfigPartFrFragment())
+                .replace(R.id.fragment_container, StartPartidaFragment())
                 .addToBackStack(null)
                 .commit()
 
         }
+
 
     }
 

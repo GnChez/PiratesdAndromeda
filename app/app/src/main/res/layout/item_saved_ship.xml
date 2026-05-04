@@ -27,10 +27,20 @@
             tools:text="Nave viajeros locos"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@id/btnDeleteShip"
             android:layout_marginStart="15dp"
-             />
+            app:layout_constraintBottom_toTopOf="@id/tvRoomCount" />
+
+        <TextView
+            android:id="@+id/tvRoomCount"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/pirata"
+            android:textColor="@color/anaranjado_light"
+            android:textSize="12sp"
+            tools:text="3 habitaciones"
+            app:layout_constraintTop_toBottomOf="@id/tvShipName"
+            app:layout_constraintStart_toStartOf="@id/tvShipName" />
 
         <ImageButton
             android:id="@+id/btnDeleteShip"

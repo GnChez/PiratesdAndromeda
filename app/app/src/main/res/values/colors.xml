@@ -28,9 +28,9 @@
     <color name="texto_campo">#CCCCCC</color>
     <color name="hint_color">#88888888</color>
     <color name="dorado_claro">#F5B041</color>
-    <color name="tituloRojizo">#8B3C2E</color>
+    <color name="titulo_rojizo">#8B3C2E</color>
     <color name="anaranjado">#BC7050</color>
-    <color name="anaranjadoLight">#D99679</color>
+    <color name="anaranjado_light">#D99679</color>
 
     <!-- Colores de Sombras -->
     <color name="sombra_naranja">#DD773333</color>

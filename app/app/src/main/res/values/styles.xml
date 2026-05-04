@@ -10,7 +10,7 @@
 
     <style name="TextAppearance.Piratas.Title" parent="TextAppearance.Material3.HeadlineMedium">
         <item name="android:fontFamily">@font/pirata</item>
-        <item name="android:textColor">@color/tituloRojizo</item>
+        <item name="android:textColor">@color/titulo_rojizo</item>
         <item name="android:textSize">45sp</item>
     </style>
 

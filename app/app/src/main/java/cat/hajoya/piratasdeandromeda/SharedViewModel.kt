@@ -22,8 +22,8 @@ class SharedViewModel : ViewModel() {
 
 	private val _rooms = MutableLiveData(
 		listOf(
-			RoomItem(1L, "Sala de combate"),
-			RoomItem(2L, "Sala de motores"),
+			RoomItem(1L, "Sala de combate", 1L),
+			RoomItem(2L, "Sala de motores", 1L),
 		)
 	)
 	val rooms: LiveData<List<RoomItem>> = _rooms
@@ -44,7 +44,7 @@ class SharedViewModel : ViewModel() {
 		val trimmedName = name.trim()
 		if (trimmedName.isEmpty()) return
 
-		val updatedList = _rooms.value.orEmpty() + RoomItem(nextRoomId++, trimmedName)
+		val updatedList = _rooms.value.orEmpty() + RoomItem(nextRoomId++, trimmedName, 1L)
 		_rooms.value = updatedList
 	}
 

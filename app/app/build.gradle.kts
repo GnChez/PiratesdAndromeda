@@ -4,6 +4,11 @@ plugins {
     id("kotlin-kapt")
 }
 
+kapt {
+    // Evita errores MissingType en procesamiento incremental cuando hay tipos generados en compilacion.
+    correctErrorTypes = true
+}
+
 android {
     namespace = "cat.hajoya.piratasdeandromeda"
     compileSdk = 36
@@ -16,9 +21,6 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-
-        buildConfigField("String", "BASE_HTTP_URL", "\"http://10.0.2.2:8000/\"")
-        buildConfigField("String", "BASE_WS_URL", "\"ws://10.0.2.2:8000\"")
     }
 
     buildFeatures {
@@ -27,12 +29,18 @@ android {
     }
 
     buildTypes {
+        debug {
+            buildConfigField("String", "BASE_HTTP_URL", "\"http://10.0.2.2:8000/\"")
+            buildConfigField("String", "BASE_WS_URL", "\"ws://10.0.2.2:8000\"")
+        }
         release {
             isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            buildConfigField("String", "BASE_HTTP_URL", "\"https://api.piratasandromeda.me/\"")
+            buildConfigField("String", "BASE_WS_URL", "\"wss://api.piratasandromeda.me\"")
         }
     }
     compileOptions {

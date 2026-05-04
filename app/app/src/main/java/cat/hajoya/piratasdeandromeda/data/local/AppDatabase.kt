@@ -7,8 +7,8 @@ import androidx.room.RoomDatabase
 
 /** Base de datos local para cache offline. */
 @Database(
-    entities = [CachedUser::class, CachedPartida::class],
-    version = 1,
+    entities = [CachedUser::class, CachedPartida::class, ShipEntity::class, RoomEntity::class],
+    version = 3,
     exportSchema = false,
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -18,6 +18,12 @@ abstract class AppDatabase : RoomDatabase() {
 
     /** DAO de partidas cacheadas. */
     abstract fun partidaDao(): PartidaDao
+
+    /** DAO de naves persistidas. */
+    abstract fun shipDao(): ShipDao
+
+    /** DAO de salas persistidas. */
+    abstract fun roomDao(): RoomDao
 
     companion object {
         @Volatile

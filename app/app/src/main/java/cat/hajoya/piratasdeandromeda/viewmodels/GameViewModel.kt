@@ -3,6 +3,11 @@ package cat.hajoya.piratasdeandromeda.viewmodels
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import cat.hajoya.piratasdeandromeda.RoomItem
+import cat.hajoya.piratasdeandromeda.SavedShip
+import cat.hajoya.piratasdeandromeda.data.local.SessionManager
+import cat.hajoya.piratasdeandromeda.data.repository.ShipRepository
 import cat.hajoya.piratasdeandromeda.models.ConfigPartida
 import cat.hajoya.piratasdeandromeda.models.Dificultad
 import cat.hajoya.piratasdeandromeda.models.EstatPartida
@@ -12,28 +17,47 @@ import cat.hajoya.piratasdeandromeda.models.Missio
 import cat.hajoya.piratasdeandromeda.models.Partida
 import cat.hajoya.piratasdeandromeda.models.Personaje
 import cat.hajoya.piratasdeandromeda.models.RolJoc
-import cat.hajoya.piratasdeandromeda.RoomItem
-import cat.hajoya.piratasdeandromeda.SavedShip
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 
-class GameViewModel : ViewModel() {
-    private var nextShipId = 3L
-    private var nextRoomId = 3L
+@OptIn(ExperimentalCoroutinesApi::class)
+@Suppress("unused")
+class GameViewModel(
+    private val shipRepository: ShipRepository,
+    private val sessionManager: SessionManager,
+) : ViewModel() {
 
-    private val _savedShips = MutableLiveData(
-        listOf(
-            SavedShip(1L, "Nave Ron Derramado"),
-            SavedShip(2L, "La Gaviota Negra"),
-        )
-    )
-    val savedShips: LiveData<List<SavedShip>> = _savedShips
+    private val _selectedShipId = kotlinx.coroutines.flow.MutableStateFlow<Long?>(null)
+    val selectedShipId: StateFlow<Long?> = _selectedShipId
 
-    private val _rooms = MutableLiveData(
-        listOf(
-            RoomItem(1L, "Sala de combate"),
-            RoomItem(2L, "Sala de motores"),
-        )
-    )
-    val rooms: LiveData<List<RoomItem>> = _rooms
+    /** Evento que se emite cuando se crea una nave exitosamente */
+    private val _shipCreatedEvent = MutableSharedFlow<Long>(replay = 0)
+    val shipCreatedEvent = _shipCreatedEvent.asSharedFlow()
+
+    /** Evento que se emite cuando se crea una habitación exitosamente */
+    private val _roomCreatedEvent = MutableSharedFlow<Long>(replay = 0)
+    val roomCreatedEvent = _roomCreatedEvent.asSharedFlow()
+
+    val savedShips: StateFlow<List<SavedShip>> = shipRepository.allShips
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
+
+    val allRooms: StateFlow<List<RoomItem>> = shipRepository.allRooms
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
+
+    val rooms: StateFlow<List<RoomItem>> = _selectedShipId.flatMapLatest { shipId ->
+        if (shipId != null) {
+            shipRepository.getRoomsForShip(shipId)
+        } else {
+            shipRepository.allRooms
+        }
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
     private val _partidaActual = MutableLiveData<Partida?>()
     val partidaActual: LiveData<Partida?> = _partidaActual
@@ -41,7 +65,7 @@ class GameViewModel : ViewModel() {
     private val _jugadorActual = MutableLiveData<JugadorPartida?>()
     val jugadorActual: LiveData<JugadorPartida?> = _jugadorActual
 
-    private val _estatPartida = MutableLiveData<EstatPartida>()
+    private val _estatPartida = MutableLiveData<EstatPartida>(EstatPartida.ESPERANT_JUGADORS)
     val estatPartida: LiveData<EstatPartida> = _estatPartida
 
     private val _tempsRestant = MutableLiveData<Int>()
@@ -62,6 +86,10 @@ class GameViewModel : ViewModel() {
     private val _habitacionsPartida = MutableLiveData<List<Habitacio>>()
     val habitacionsPartida: LiveData<List<Habitacio>> = _habitacionsPartida
 
+    fun selectShip(shipId: Long) {
+        _selectedShipId.value = shipId
+    }
+
     fun crearPartidaLite(config: ConfigPartida) {
         val partida = Partida(
             id = 1,
@@ -73,10 +101,13 @@ class GameViewModel : ViewModel() {
             numImpostors = config.numImpostors,
             tempsLimitMinuts = config.tempsLimitMinuts,
             percentatgeReparacio = 0f,
-            dificultad = config.dificultad
+            dificultad = config.dificultad,
         )
         _partidaActual.value = partida
         _percentatgeReparacio.value = 0f
+        viewModelScope.launch(Dispatchers.IO) {
+            sessionManager.saveGameCode(partida.codiPartida)
+        }
     }
 
     fun unirsePartida(codi: String) {
@@ -90,9 +121,12 @@ class GameViewModel : ViewModel() {
             numImpostors = 1,
             tempsLimitMinuts = 10,
             percentatgeReparacio = 0f,
-            dificultad = Dificultad.MITJA
+            dificultad = Dificultad.MITJA,
         )
         _partidaActual.value = partida
+        viewModelScope.launch(Dispatchers.IO) {
+            sessionManager.saveGameCode(codi)
+        }
     }
 
     fun triarPersonatge(personatge: Personaje) {
@@ -104,14 +138,14 @@ class GameViewModel : ViewModel() {
             viu = true,
             missionsCompletades = 0,
             punts = 0,
-            personatge = personatge
+            personatge = personatge,
         )
         _jugadorActual.value = jugador
     }
 
     fun iniciarPartida() {
         _estatPartida.value = EstatPartida.EN_CURS
-        _tempsRestant.value = 600 // 10 minutos en segundos
+        _tempsRestant.value = 600
     }
 
     fun completarMissio(missioId: Int) {
@@ -137,21 +171,38 @@ class GameViewModel : ViewModel() {
     fun addSavedShip(name: String) {
         val trimmed = name.trim()
         if (trimmed.isEmpty()) return
-        _savedShips.value = _savedShips.value.orEmpty() + SavedShip(nextShipId++, trimmed)
+        viewModelScope.launch(Dispatchers.IO) {
+            val newId = shipRepository.addShip(trimmed)
+            _selectedShipId.value = newId
+            // Emitir evento para notificar que la nave se creó exitosamente
+            _shipCreatedEvent.emit(newId)
+        }
     }
 
     fun deleteSavedShip(shipId: Long) {
-        _savedShips.value = _savedShips.value.orEmpty().filterNot { it.id == shipId }
+        viewModelScope.launch(Dispatchers.IO) {
+            shipRepository.deleteShip(shipId)
+            if (_selectedShipId.value == shipId) {
+                _selectedShipId.value = null
+            }
+        }
     }
 
     fun addRoom(name: String) {
+        val shipId = _selectedShipId.value ?: return
         val trimmed = name.trim()
         if (trimmed.isEmpty()) return
-        _rooms.value = _rooms.value.orEmpty() + RoomItem(nextRoomId++, trimmed)
+        viewModelScope.launch(Dispatchers.IO) {
+            val roomId = shipRepository.addRoom(shipId, trimmed)
+            // Emitir evento para notificar que la habitación se creó exitosamente
+            _roomCreatedEvent.emit(roomId)
+        }
     }
 
     fun deleteRoom(roomId: Long) {
-        _rooms.value = _rooms.value.orEmpty().filterNot { it.id == roomId }
+        viewModelScope.launch(Dispatchers.IO) {
+            shipRepository.deleteRoom(roomId)
+        }
     }
 }
 

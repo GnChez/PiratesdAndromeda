@@ -7,6 +7,7 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.commit
 import cat.hajoya.piratasdeandromeda.databinding.StartFrBinding
+import cat.hajoya.piratasdeandromeda.ui.preparacio.StartPartidaFragment
 
 class StartFrFragment : Fragment() {
 
@@ -47,7 +48,7 @@ class StartFrFragment : Fragment() {
                 android.R.anim.fade_in,
                 android.R.anim.fade_out,
             )
-            replace(R.id.fragment_container, ConfigPartFrFragment())
+            replace(R.id.fragment_container, StartPartidaFragment())
             addToBackStack(null)
         }
     }

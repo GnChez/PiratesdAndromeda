@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
@@ -21,6 +22,9 @@ class SessionManager(private val context: Context) {
     /** Flujo de nombre de usuario actual. */
     val nombreUsuario: Flow<String?> = context.sessionDataStore.data.map { it[KEY_NOMBRE_USUARIO] }
 
+    /** Flujo de email actual. */
+    val email: Flow<String?> = context.sessionDataStore.data.map { it[KEY_EMAIL] }
+
     /** Flujo con código websocket del jugador. */
     val wsCode: Flow<String?> = context.sessionDataStore.data.map { it[KEY_WS_CODE] }
 
@@ -35,6 +39,11 @@ class SessionManager(private val context: Context) {
     /** Guarda nombre de usuario. */
     suspend fun saveNombreUsuario(value: String) {
         context.sessionDataStore.edit { prefs -> prefs[KEY_NOMBRE_USUARIO] = value }
+    }
+
+    /** Guarda email del usuario. */
+    suspend fun saveEmail(value: String) {
+        context.sessionDataStore.edit { prefs -> prefs[KEY_EMAIL] = value }
     }
 
     /** Guarda ws_code de sesión. */
@@ -52,11 +61,30 @@ class SessionManager(private val context: Context) {
         context.sessionDataStore.edit { it.clear() }
     }
 
+    /** Flujo de modo oscuro. */
+    val darkModeEnabled: Flow<Boolean> = context.sessionDataStore.data.map { it[KEY_DARK_MODE] ?: false }
+
+    /** Flujo de idioma seleccionado. */
+    val selectedLanguage: Flow<String> = context.sessionDataStore.data.map { it[KEY_LANGUAGE] ?: "Català" }
+
+    /** Guarda el modo oscuro. */
+    suspend fun saveDarkMode(enabled: Boolean) {
+        context.sessionDataStore.edit { prefs -> prefs[KEY_DARK_MODE] = enabled }
+    }
+
+    /** Guarda el idioma. */
+    suspend fun saveLanguage(lang: String) {
+        context.sessionDataStore.edit { prefs -> prefs[KEY_LANGUAGE] = lang }
+    }
+
     companion object {
         val KEY_USER_ID = intPreferencesKey("key_user_id")
         val KEY_NOMBRE_USUARIO = stringPreferencesKey("key_nombre_usuario")
+        val KEY_EMAIL = stringPreferencesKey("key_email")
         val KEY_WS_CODE = stringPreferencesKey("key_ws_code")
         val KEY_GAME_CODE = stringPreferencesKey("key_game_code")
+        val KEY_DARK_MODE = booleanPreferencesKey("key_dark_mode")
+        val KEY_LANGUAGE = stringPreferencesKey("key_language")
     }
 }
 

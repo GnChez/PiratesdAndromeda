@@ -49,6 +49,21 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"/>
 
+        <TextView
+            android:id="@+id/tvEmptyRooms"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:gravity="center"
+            android:importantForAccessibility="yes"
+            android:text="@string/empty_rooms_message"
+            android:textAppearance="@style/TextAppearance.Piratas.Section"
+            android:textSize="16sp"
+            android:visibility="gone"
+            app:layout_constraintTop_toBottomOf="@id/rvRooms"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+
         <EditText
             android:id="@+id/edRoomName"
             android:layout_width="0dp"
@@ -63,7 +78,7 @@
             android:textColor="@color/anaranjado"
             android:textColorHint="@color/anaranjado"
             android:textSize="16sp"
-            app:layout_constraintTop_toBottomOf="@id/rvRooms"
+            app:layout_constraintTop_toBottomOf="@id/tvEmptyRooms"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toStartOf="@id/btnAddRoom" />
 

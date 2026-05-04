@@ -28,6 +28,7 @@ class UserRepository private constructor(
             database.userDao().insertOrReplace(response.toCachedUser())
             sessionManager.saveUserId(response.idUsuario)
             sessionManager.saveNombreUsuario(response.nombreUsuario)
+            sessionManager.saveEmail(response.email)
             response
         }.recoverCatching { throwable ->
             throw throwable.toDomainException(prefix = "Error al registrar")
@@ -41,6 +42,7 @@ class UserRepository private constructor(
             database.userDao().insertOrReplace(response.toCachedUser())
             sessionManager.saveUserId(response.idUsuario)
             sessionManager.saveNombreUsuario(response.nombreUsuario)
+            sessionManager.saveEmail(response.email)
             Result.success(response)
         } catch (io: IOException) {
             val cached = database.userDao().getUserByIdentity(request.nombreUsuario)
@@ -48,6 +50,7 @@ class UserRepository private constructor(
             if (cached != null) {
                 sessionManager.saveUserId(cached.id_usuario)
                 sessionManager.saveNombreUsuario(cached.nombre_usuario)
+                sessionManager.saveEmail(cached.email)
                 Result.success(cached.toUserResponse())
             } else {
                 Result.failure(Exception("Sin conexión y sin usuario cacheado"))

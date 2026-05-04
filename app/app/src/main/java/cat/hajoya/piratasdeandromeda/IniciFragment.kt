@@ -7,6 +7,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.activityViewModels
 import cat.hajoya.piratasdeandromeda.databinding.IniciBinding
+import cat.hajoya.piratasdeandromeda.ui.preparacio.StartPartidaFragment
 import kotlin.getValue
 
 
@@ -52,7 +53,7 @@ class IniciFragment: Fragment() {
 
         binding.btnEntra.setOnClickListener {
             parentFragmentManager.beginTransaction()
-                .replace(R.id.fragment_container, ConfigPartFrFragment())
+                .replace(R.id.fragment_container, StartPartidaFragment())
                 .addToBackStack(null)
                 .commit()
         }

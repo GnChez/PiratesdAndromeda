@@ -36,7 +36,7 @@
             android:layout_height="wrap_content"
             android:fontFamily="@font/pirata"
             android:layout_gravity="start"
-            android:text="@string/signUp_subrallado"
+            android:text="@string/sign_up_subrallado"
             android:contentDescription="@string/go_to_register_cd"
             app:layout_constraintStart_toEndOf="@+id/tvLogin"
             app:layout_constraintTop_toTopOf="parent"
