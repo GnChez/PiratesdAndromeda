@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import List
+from typing import List, Optional
 
 from sqlalchemy import func
 from sqlmodel import Session, select
@@ -34,6 +34,47 @@ def get_game_mission_row(db: Session, mission_game_id: int) -> MisionesPartida |
     return db.exec(
         select(MisionesPartida).where(MisionesPartida.id_mision_partida == mission_game_id)
     ).first()
+
+
+def resolve_catalog_mision_id_for_eventos(db: Session, mission_ref: int) -> Optional[int]:
+    """
+    `eventos_partida.id_mision_relacionada` apunta a `misiones.id_mision` (catálogo), no a
+    `misiones_partida.id_mision_partida`. Convierte instancia de partida -> catálogo; si ya
+    es un id de catálogo válido (sin fila de instancia con esa PK), devuelve el mismo valor.
+    """
+    mp = get_game_mission_row(db, mission_ref)
+    if mp is not None:
+        return mp.id_mision
+    if get_mission(db, mission_ref) is not None:
+        return mission_ref
+    return None
+
+
+def resolve_mision_partida_instance_id(
+    db: Session, game_id: int, player_id: int, mission_ref: int
+) -> int | None:
+    """
+    Acepta `id_mision_partida` o `id_mision` (catálogo) en esta partida.
+
+    Solo devuelve un `id_mision_partida` si existe fila en `misiones_partida_jugador`
+    para **este jugador** (la misión debe estar asignada a él en el reparto).
+    """
+    row = _get_mision_partida_jugador(db, mission_ref)
+    if row is not None and row.id_jugador == player_id:
+        return mission_ref
+
+    mp = db.exec(
+        select(MisionesPartida).where(
+            MisionesPartida.id_partida == game_id,
+            MisionesPartida.id_mision == mission_ref,
+        )
+    ).first()
+    if mp is None:
+        return None
+    row2 = _get_mision_partida_jugador(db, mp.id_mision_partida)
+    if row2 is not None and row2.id_jugador == player_id:
+        return mp.id_mision_partida
+    return None
 
 
 def get_random_sabotage_candidate_by_game(
@@ -85,16 +126,21 @@ def update_mission_start_time(db: Session, mission_id: int) -> MisionesPartidaJu
     return row
 
 
-def update_mission_completion(db: Session, mission_id: int) -> MisionesPartidaJugador | None:
+def update_mission_completion(
+    db: Session, mission_id: int
+) -> tuple[MisionesPartidaJugador | None, bool]:
+    """Marca misión como completada. Devuelve (fila, True) si fue la primera vez, (fila, False) si ya estaba completada."""
     row = _get_mision_partida_jugador(db, mission_id)
     if not row:
-        return None
+        return None, False
+    if row.id_estado_mision == 3:
+        return row, False
     row.fecha_completada = datetime.now()
     row.id_estado_mision = 3
     db.add(row)
     db.commit()
     db.refresh(row)
-    return row
+    return row, True
 
 
 def update_mission_sabotage(db: Session, mission_id: int) -> MisionesPartidaJugador | None:

@@ -1,5 +1,5 @@
 from decimal import Decimal
-from typing import List
+from typing import List, Optional
 
 from sqlalchemy.exc import IntegrityError
 from sqlmodel import Session, select
@@ -9,6 +9,22 @@ from models.games import Partidas, JugadoresPartida
 from models.links import MisionesPartida, MisionesPartidaJugador
 from schemas.games import PartidaCreateData, PartidaJoinRequest
 import CRUD.look_up as lookup
+from CRUD.users import get_user
+
+
+def display_name_for_game_player(db: Session, game_id: int, user_id: int) -> Optional[str]:
+    """Nombre público para WS: `nombre_usuario` de `usuarios`, o `apodo_partida` en la partida."""
+    u = get_user(db, user_id)
+    if u is not None:
+        nu = (u.nombre_usuario or "").strip()
+        if nu:
+            return nu
+    row = get_player_row(db, game_id, user_id)
+    if row is not None and row.apodo_partida:
+        ap = str(row.apodo_partida).strip()
+        if ap:
+            return ap
+    return None
 
 
 def get_game_by_id(db: Session, game_id: int) -> Partidas | None:
@@ -176,6 +192,25 @@ def mark_player_dead(
     db.commit()
     db.refresh(row)
     return row
+
+
+def add_mission_completion_points(
+    db: Session, game_id: int, user_id: int, id_mision_partida: int
+) -> JugadoresPartida | None:
+    """Suma `puntos_otorgados` de la misión (catálogo) e incrementa `misiones_completadas` en la partida."""
+    import CRUD.missions as missions_crud
+
+    player = get_player_row(db, game_id, user_id)
+    if player is None:
+        return None
+    mision = missions_crud.get_mission_by_game_mission_id(db, id_mision_partida)
+    points = int(mision.puntos_otorgados) if mision is not None else 100
+    player.puntos_partida = int(player.puntos_partida or 0) + points
+    player.misiones_completadas = int(player.misiones_completadas or 0) + 1
+    db.add(player)
+    db.commit()
+    db.refresh(player)
+    return player
 
 
 def leave_game(db: Session, codigo_partida: str, id_usuario: int) -> bool:

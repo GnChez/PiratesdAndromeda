@@ -1,150 +1,295 @@
-import json
-import aiomqtt
+"""
+MQTT pipeline (minimal).
+
+INGRESS (server subscribes ONLY to this):
+    juego/devices/<join_code>/<nombre_juego>/<evento>
+    where <evento> ∈ {started, completed, sabotaged, desabotaged}
+
+Canonical JSON body:
+    {"username": "joan", "mission_id": 1}
+
+Behavior:
+- Extra fields in the JSON are silently ignored.
+- If `username` is not a player of <join_code>, OR `mission_id` does not resolve to a
+  mission in that partida, the message is DROPPED with a warning (no DB write, no WS).
+- For valid messages we (a) run the matching DB side effect and (b) broadcast a
+  minimal payload to the room's websocket.
+
+EGRESS:
+    juego/commands/<join_code>/<game>/<event>   (server -> hardware)
+    via `publish_mission_event(...)`. Topic format is intentionally kept stable.
+
+Outbound WS body for a device event (broadcast to room):
+    {
+      "type": "START_MISSION" | "COMPLETE_MISSION" | "SABOTAGE" | "DESABOTAGE",
+      "source": "mqtt",
+      "action": "started" | "completed" | "sabotaged" | "desabotaged",
+      "player": "<id_usuario>",       # mismo criterio que WS de app (monitor / puntuación)
+      "username": "joan",
+      "mission_id": 1,
+      "mission_name": "...",    # omitted when not resolvable
+      "join_code": "UV2924",
+      "nombre_juego": "JUEGOLED"
+    }
+"""
+
 import asyncio
-from core.socket_manager import manager
-from dotenv import load_dotenv
+import json
+import logging
 import os
 from typing import Any
-from sqlmodel import Session
-import CRUD.missions as missions_crud
+
+import aiomqtt
+from dotenv import load_dotenv
+from sqlmodel import Session, select
+
 import CRUD.games as games_crud
+import CRUD.missions as missions_crud
+from core.socket_manager import manager
 from db.dbconnection import engine
+from models.games import JugadoresPartida, Partidas
+from models.links import MisionesPartida
+from models.missions import Misiones
+from models.users import Usuarios
 
 
-# Configuración
-MQTT_BROKER = "129.158.197.45"
-MQTT_PORT = 1883
-TOPIC_SENSORS = "juego/devices/#"  # juego/devices/{room code}/{game}/started
-TOPIC_COMMANDS = "juego/commands/#"
-TOPIC_MISSION_COMMAND_TEMPLATE = "juego/commands/{join_code}/missions/{event}"
+log = logging.getLogger(__name__)
+
 load_dotenv()
+
+MQTT_BROKER ="129.158.197.45"
+MQTT_PORT = 1883
+TOPIC_DEVICES_SUBSCRIBE = "juego/devices/#"
+TOPIC_MISSION_COMMAND_TEMPLATE = "juego/commands/{join_code}/{game}/{event}"
+
 USERNAME = os.environ.get("MQTT_USER")
 PWD = os.environ.get("PASSWORD")
 
-
-def _extract_message_text(payload: Any) -> str:
-    """Normaliza distintos formatos de payload a texto."""
-    if isinstance(payload, dict):
-        if "action" in payload:
-            return str(payload["action"])
-        if "id_usuario" in payload:
-            return str(payload["id_usuario"])
-        if len(payload) == 1:
-            return str(next(iter(payload.values())))
-        return json.dumps(payload, ensure_ascii=False)
-    if isinstance(payload, list):
-        return json.dumps(payload, ensure_ascii=False)
-    return str(payload)
+# Single source of truth for action -> WS type mapping.
+ACTION_TO_TYPE: dict[str, str] = {
+    "started": "START_MISSION",
+    "completed": "COMPLETE_MISSION",
+    "sabotaged": "SABOTAGE",
+    "desabotaged": "DESABOTAGE",
+}
 
 
-def _extract_mission_id(payload: Any) -> int | None:
-    if not isinstance(payload, dict):
+def _maybe_inner_json_dict(val: Any) -> dict[str, Any] | None:
+    """If `val` is a JSON object string, return the parsed dict; else None."""
+    if not isinstance(val, str):
         return None
-    mission_id = (
-        payload.get("mission_id")
-        or payload.get("id_mision_partida")
-        or payload.get("id_mision")
-    )
-    if mission_id is None:
+    s = val.strip()
+    if not s.startswith("{"):
         return None
     try:
-        return int(mission_id)
-    except (TypeError, ValueError):
-        return None
-
-
-def _decode_payload(raw_payload: bytes) -> Any:
-    decoded_payload = raw_payload.decode()
-    try:
-        return json.loads(decoded_payload)
+        inner = json.loads(s)
     except json.JSONDecodeError:
-        return {"raw_payload": decoded_payload}
+        return None
+    return inner if isinstance(inner, dict) else None
 
 
-def _extract_join_code(topic_parts: list[str]) -> str | None:
+def _decode_payload(raw: Any) -> dict[str, Any]:
     """
-    Espera topics:
-    - juego/devices/{join_code}/...
-    - juego/commands/{join_code}/...
+    Decode an MQTT payload as a JSON object.
+
+    Handles:
+    - bytes / bytearray / memoryview (typical from brokers)
+    - JSON that was accidentally double-encoded (outer JSON is a string)
     """
-    if len(topic_parts) < 3:
+    if raw is None:
+        return {}
+    if isinstance(raw, str):
+        text = raw.strip()
+    elif isinstance(raw, (bytes, bytearray, memoryview)):
+        try:
+            text = bytes(raw).decode().strip()
+        except UnicodeDecodeError:
+            return {}
+    else:
+        return {}
+    if not text:
+        return {}
+    try:
+        data: Any = json.loads(text)
+    except json.JSONDecodeError:
+        return {}
+    if isinstance(data, str):
+        try:
+            data = json.loads(data)
+        except json.JSONDecodeError:
+            return {}
+    return data if isinstance(data, dict) else {}
+
+
+def _username_mission_from_payload(payload: dict[str, Any]) -> tuple[str, int | None]:
+    """
+    Read canonical `username` / `mission_id`, and unwrap legacy firmware shapes where
+    the device duplicated the JSON body as a string under `action` / `id_usuario`.
+    """
+    username = str(payload.get("username") or "").strip()
+    raw_mid: Any = payload.get("mission_id")
+
+    if (not username or raw_mid is None) and isinstance(payload, dict):
+        for key in ("action", "id_usuario", "payload", "body", "data", "message"):
+            inner = _maybe_inner_json_dict(payload.get(key))
+            if inner:
+                if not username:
+                    username = str(inner.get("username") or "").strip()
+                if raw_mid is None and inner.get("mission_id") is not None:
+                    raw_mid = inner.get("mission_id")
+
+    inner_u = _maybe_inner_json_dict(username) if username.startswith("{") else None
+    if inner_u:
+        username = str(inner_u.get("username") or "").strip()
+        if raw_mid is None:
+            raw_mid = inner_u.get("mission_id")
+
+    try:
+        mission_id = int(raw_mid) if raw_mid is not None else None
+    except (TypeError, ValueError):
+        mission_id = None
+    return username, mission_id
+
+
+def _resolve_context(
+    db: Session, join_code: str, username: str, mission_id: int
+) -> tuple[Partidas, MisionesPartida, int] | None:
+    """
+    Return (partida, mision_partida, id_usuario) iff:
+      - join_code maps to a Partidas row,
+      - `username` is a registered player of that partida,
+      - `mission_id` is a MisionesPartida row inside that partida.
+    Otherwise return None (caller must drop the message).
+    """
+    print(join_code, username)
+    partida = db.exec(
+        select(Partidas).where(Partidas.codigo_partida == join_code)
+    ).first()
+    if partida is None:
         return None
-    if topic_parts[0] != "juego":
+
+    user = db.exec(
+        select(Usuarios).where(Usuarios.nombre_usuario == username)
+    ).first()
+    if user is None:
         return None
-    if topic_parts[1] not in {"devices", "commands"}:
+    player_row = db.exec(
+        select(JugadoresPartida).where(
+            JugadoresPartida.id_partida == partida.id_partida,
+            JugadoresPartida.id_usuario == user.id_usuario,
+        )
+    ).first()
+    if player_row is None:
         return None
-    return topic_parts[2]
+    mp = db.exec(
+        select(MisionesPartida).where(
+            MisionesPartida.id_mision == mission_id,
+            MisionesPartida.id_partida == partida.id_partida,
+        )
+    ).first()
+    if mp is None:
+        return None
+    return partida, mp, user.id_usuario
 
 
-async def _broadcast_room_event(join_code: str, event_type: str, payload: Any) -> None:
-    room_uuid = manager.join_code_to_room_uuid(join_code)
-    mission_id = _extract_mission_id(payload)
-    message = {
-        "type": event_type,
-        "action": _extract_message_text(payload),
-        "id_usuario": _extract_message_text(payload),
-        "source": "mqtt",
-    }
-    if mission_id is not None:
-        message["mission_id"] = mission_id
-    await manager.broadcast_to_room(
-        message,
-        room_uuid,
-    )
+def _apply_db_effect(db: Session, action: str, mp: MisionesPartida) -> bool:
+    """Aplica efectos en BD. Devuelve False si `completed` era duplicado (sin cambios)."""
+    mission_id = mp.id_mision_partida
+    if action == "started":
+        missions_crud.update_mission_start_time(db, mission_id)
+        return True
+    if action == "completed":
+        _, newly = missions_crud.update_mission_completion(db, mission_id)
+        if not newly:
+            return False
+        mision = missions_crud.get_mission_by_game_mission_id(db, mission_id)
+        if mision is not None:
+            games_crud.update_reparacion_partida(
+                db, mp.id_partida, mision.porcentaje_reparacion
+            )
+        return True
+    if action == "sabotaged":
+        missions_crud.update_mission_sabotage(db, mission_id)
+        return True
+    if action == "desabotaged":
+        missions_crud.update_mission_desabotage(db, mission_id)
+        return True
+    return True
 
 
-async def _handle_device_event(topic_parts: list[str], payload: Any) -> None:
-    join_code = _extract_join_code(topic_parts)
-    if not join_code:
-        print(f"⚠️ Topic de dispositivo inválido: {'/'.join(topic_parts)}")
+async def _handle_device_event(topic_parts: list[str], payload: dict[str, Any]) -> None:
+    """
+    Topic: juego/devices/<join_code>/<nombre_juego>/<evento>
+    Body:  {"username": "...", "mission_id": <int>}  (extras ignored)
+    """
+    if len(topic_parts) < 5 or topic_parts[:2] != ["juego", "devices"]:
+        log.warning("MQTT topic invalido: %s", "/".join(topic_parts))
         return
 
-    event = topic_parts[-1]
-    event_to_type = {
-        "started": "START_MISSION",
-        "completed": "COMPLETE_MISSION",
-        "sabotaged": "SABOTAGE",
-        "desabotaged": "DESABOTAGE",
-    }
-    event_type = event_to_type.get(event)
-    if not event_type:
-        print(f"ℹ️ Evento de dispositivo no soportado: {event}")
+    join_code = topic_parts[2]
+    nombre_juego = topic_parts[3]
+    topic_event = topic_parts[4]
+
+    event_type = ACTION_TO_TYPE.get(topic_event)
+    if event_type is None:
+        log.info("MQTT evento no soportado: %s", topic_event)
         return
 
-    mission_id = _extract_mission_id(payload)
-    if mission_id is None:
-        print(f"⚠️ Evento de dispositivo sin mission_id: {payload}")
+    username, mission_id = _username_mission_from_payload(payload)
+
+    if not username or mission_id is None:
+        log.warning(
+            "MQTT body sin username/mission_id: topic=%s body=%s",
+            "/".join(topic_parts),
+            payload,
+        )
         return
 
     with Session(engine) as db:
-        if event == "started":
-            missions_crud.update_mission_start_time(db, mission_id)
-        elif event == "completed":
-            missions_crud.update_mission_completion(db, mission_id)
-            mission = missions_crud.get_mission_by_game_mission_id(db, mission_id)
-            game_mission_row = missions_crud.get_game_mission_row(db, mission_id)
-            if mission is not None and game_mission_row is not None:
-                games_crud.update_reparacion_partida(
-                    db, game_mission_row.id_partida, mission.porcentaje_reparacion
-                )
-        elif event == "sabotaged":
-            missions_crud.update_mission_sabotage(db, mission_id)
-        elif event == "desabotaged":
-            missions_crud.update_mission_desabotage(db, mission_id)
+        ctx = _resolve_context(db, join_code, username, mission_id)
+        if ctx is None:
+            log.warning(
+                "MQTT descartado (usuario o mision no pertenecen a la partida): "
+                "join_code=%s username=%s mission_id=%s",
+                join_code,
+                username,
+                mission_id,
+            )
+            return
+        partida, mp, id_usuario = ctx
+        proceed = _apply_db_effect(db, topic_event, mp)
+        if not proceed:
+            return
+        if topic_event == "completed":
+            games_crud.add_mission_completion_points(
+                db, partida.id_partida, id_usuario, mp.id_mision_partida
+            )
+        mision_row = db.get(Misiones, mp.id_mision)
+        mission_name = mision_row.nombre if mision_row is not None else None
 
-    await _broadcast_room_event(join_code, event_type, payload)
+    message: dict[str, Any] = {
+        "type": event_type,
+        "source": "mqtt",
+        "action": topic_event,
+        "player": str(id_usuario),
+        "username": username,
+        "mission_id": mission_id,
+        "join_code": join_code,
+        "nombre_juego": nombre_juego,
+    }
+    if mission_name:
+        message["mission_name"] = mission_name
 
-
-async def _handle_command_event(topic_parts: list[str], payload: Any) -> None:
-    join_code = _extract_join_code(topic_parts)
-    if not join_code:
-        print(f"⚠️ Topic de comando inválido: {'/'.join(topic_parts)}")
+    try:
+        room_uuid = manager.join_code_to_room_uuid(join_code)
+    except KeyError:
+        log.warning("join_code no registrado para WS: %s", join_code)
         return
-
-    await _broadcast_room_event(join_code, "IOT_COMMAND", payload)
+    await manager.broadcast_to_room(message, room_uuid)
 
 
 async def publish_mqtt_message(topic: str, payload: dict[str, Any]) -> None:
+    """Open a short-lived connection and publish a JSON payload."""
     async with aiomqtt.Client(
         hostname=MQTT_BROKER,
         port=MQTT_PORT,
@@ -154,48 +299,51 @@ async def publish_mqtt_message(topic: str, payload: dict[str, Any]) -> None:
         await client.publish(topic, json.dumps(payload, ensure_ascii=False))
 
 
-async def publish_mission_event(join_code: str, event: str, payload: dict[str, Any]) -> None:
-    topic = TOPIC_MISSION_COMMAND_TEMPLATE.format(join_code=join_code, event=event)
+async def publish_mission_event(
+    join_code: str,
+    event: str,
+    payload: dict[str, Any],
+    *,
+    game: str = "MISSION",
+) -> None:
+    """Server -> hardware: publish to juego/commands/<join_code>/<game>/<event>."""
+    topic = TOPIC_MISSION_COMMAND_TEMPLATE.format(
+        join_code=join_code, game=game, event=event
+    )
     await publish_mqtt_message(topic, payload)
 
 
-async def game_mqtt():
+async def game_mqtt() -> None:
+    """Subscribe forever to the devices topic and dispatch each message."""
     while True:
         try:
-            async with aiomqtt.Client(hostname=MQTT_BROKER, port=MQTT_PORT, username=USERNAME, password=PWD) as client:
-                await client.subscribe(f"{TOPIC_SENSORS}")
-                await client.subscribe(f"{TOPIC_COMMANDS}")
-                print(f"✅ Conectado a MQTT. Escuchando: {TOPIC_SENSORS}")
-                print(f"✅ Conectado a MQTT. Escuchando: {TOPIC_COMMANDS}")
+            async with aiomqtt.Client(
+                hostname=MQTT_BROKER,
+                port=MQTT_PORT,
+                username=USERNAME,
+                password=PWD,
+            ) as client:
+                await client.subscribe(TOPIC_DEVICES_SUBSCRIBE)
+                log.info("MQTT conectado. Escuchando: %s", TOPIC_DEVICES_SUBSCRIBE)
                 async for message in client.messages:
                     try:
-                        topic = message.topic.value
-                        topic_parts = topic.split("/")
+                        topic_parts = message.topic.value.split("/")
                         payload = _decode_payload(message.payload)
-
-                        if message.topic.matches("juego/devices/#"):
-                            await _handle_device_event(topic_parts, payload)
-                        elif message.topic.matches("juego/commands/#"):
-                            await _handle_command_event(topic_parts, payload)
-                        else:
-                            print(f"ℹ️ Topic ignorado: {topic}")
-                    except KeyError:
-                        # join_code no registrado en el manager.
-                        print(f"⚠️ join_code no registrado para topic {message.topic.value}")
-                    except Exception as processing_error:
-                        # No detenemos el loop por errores de un solo mensaje.
-                        print(f"⚠️ Error procesando mensaje MQTT ({message.topic.value}): {processing_error}")
-
-        except aiomqtt.MqttError as error:
-            print(f"⚠️ Error de conexión MQTT: {error}. Reintentando en 3s...")
+                        await _handle_device_event(topic_parts, payload)
+                    except Exception as err:
+                        log.warning(
+                            "Error procesando MQTT (%s): %s",
+                            message.topic.value,
+                            err,
+                        )
+        except aiomqtt.MqttError as err:
+            log.warning("MQTT desconectado: %s. Reintento en 3s...", err)
             await asyncio.sleep(3)
         except asyncio.CancelledError:
-            # Esto ocurre cuando apagamos el servidor de FastAPI (Ctrl+C)
-            print("🛑 Escuchador MQTT detenido correctamente.")
-            break  # Salimos del bucle while para apagar el hilo
-        except RuntimeError as runtime_error:
-            # Evita ruido al cerrar el loop durante apagado abrupto.
-            if "Event loop is closed" in str(runtime_error):
-                print("🛑 Event loop cerrado; deteniendo MQTT.")
+            log.info("MQTT detenido.")
+            break
+        except RuntimeError as err:
+            if "Event loop is closed" in str(err):
+                log.info("Event loop cerrado; deteniendo MQTT.")
                 break
             raise

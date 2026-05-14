@@ -12,6 +12,8 @@ class ConnectionManager:
         self.player_rooms: dict[str, list[WebSocket]] = {}
         # {room_uuid: [list_of_websockets]} — solo websockets de monitor (web).
         self.monitor_rooms: dict[str, list[WebSocket]] = {}
+        # Jugadores con WS activo: room_uuid -> {websocket -> (player_key, nombre_mostrado)}.
+        self.live_players: dict[str, dict[WebSocket, tuple[str, Optional[str]]]] = {}
         # {join_code: room_uuid}
         self.code_to_uuid: dict[str, str] = {}
         # ws_code (token devuelto en POST /join) -> (codigo_partida, id_usuario)
@@ -68,7 +70,40 @@ class ConnectionManager:
         self.active_rooms.setdefault(room_uuid, []).append(websocket)
         self.monitor_rooms.setdefault(room_uuid, []).append(websocket)
 
+    def register_live_player(
+        self,
+        websocket: WebSocket,
+        room_uuid: str,
+        player_key: str,
+        display_name: Optional[str],
+    ) -> None:
+        """Tras aceptar el WS de jugador: permite al monitor listar quien ya está en sala."""
+        self.live_players.setdefault(room_uuid, {})[websocket] = (player_key, display_name)
+
+    def unregister_live_player(self, websocket: WebSocket, room_uuid: str) -> None:
+        room = self.live_players.get(room_uuid)
+        if not room or websocket not in room:
+            return
+        del room[websocket]
+        if not room:
+            self.live_players.pop(room_uuid, None)
+
+    def snapshot_connected_players(self, room_uuid: str) -> list[dict[str, object]]:
+        """Misma forma que PLAYER_JOINED (player, nombre_usuario, player_name) para el monitor."""
+        out: list[dict[str, object]] = []
+        for _ws, (player_key, display_name) in self.live_players.get(room_uuid, {}).items():
+            out.append(
+                {
+                    "player": player_key,
+                    "nombre_usuario": display_name,
+                    "player_name": display_name,
+                    "connected": True,
+                }
+            )
+        return out
+
     def disconnect(self, websocket: WebSocket, room_uuid: str):
+        self.unregister_live_player(websocket, room_uuid)
         for bucket in (self.active_rooms, self.player_rooms, self.monitor_rooms):
             if room_uuid in bucket:
                 try:

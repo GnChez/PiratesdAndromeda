@@ -2,8 +2,8 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlmodel import Session
 
 from CRUD.events import create_game_event_by_type
-from CRUD.games import get_game_by_code
-from db.dbconnection import get_session
+from CRUD.games import display_name_for_game_player, get_game_by_code
+from db.dbconnection import engine, get_session
 from services.games import PartidasService
 from schemas.games import (
     PartidaEndRequest,
@@ -50,14 +50,20 @@ async def leave_game(leave_req: PartidaLeaveRequest, db: Session = Depends(get_s
         manager.unregister_by_game_and_player(leave_req.codigo_partida, leave_req.id_jugador)
         room_uuid = manager.code_to_uuid.get(leave_req.codigo_partida)
         if room_uuid:
-            await manager.broadcast_to_room(
-                {
-                    "event": "PLAYER_LEFT",
-                    "player": str(leave_req.id_jugador),
-                    "reason": "rest",
-                },
-                room_uuid,
-            )
+            display_name = None
+            if game is not None:
+                with Session(engine) as s:
+                    display_name = display_name_for_game_player(
+                        s, game.id_partida, leave_req.id_jugador
+                    )
+            left_msg: dict = {
+                "event": "PLAYER_LEFT",
+                "player": str(leave_req.id_jugador),
+                "reason": "rest",
+                "nombre_usuario": display_name,
+                "player_name": display_name,
+            }
+            await manager.broadcast_to_room(left_msg, room_uuid)
         if game is not None:
             try:
                 create_game_event_by_type(
