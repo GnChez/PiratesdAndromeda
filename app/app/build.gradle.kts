@@ -13,9 +13,10 @@ android {
     namespace = "cat.hajoya.piratasdeandromeda"
     compileSdk = 36
 
+
     defaultConfig {
         applicationId = "cat.hajoya.piratasdeandromeda"
-        minSdk = 24
+        minSdk = 26
         targetSdk = 36
         versionCode = 1
         versionName = "1.0"

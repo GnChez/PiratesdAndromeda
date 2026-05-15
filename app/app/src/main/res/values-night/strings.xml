@@ -85,7 +85,7 @@
     <string name="delete_ship_dialog_message">Segur que vols eliminar &quot;%1$s&quot;?</string>
     <string name="delete_ship_dialog_title">Eliminar nau</string>
     <string name="delete_ship_dialog_confirm">Acceptar</string>
-     <string name="delete_ship_dialog_cancel">Cancellar</string>
+    <string name="delete_ship_dialog_cancel">Cancellar</string>
 
     <!-- Settings -->
     <string name="settings_title">Configuració</string>
@@ -126,7 +126,7 @@
     <string name="nav_labores">LABORES</string>
     <string name="nav_labores_cd">Veure les labores</string>
     <string name="nav_reunirse">REUNIR-SE</string>
-     <string name="nav_reunirse_cd">Reunir-se amb l\'equip</string>
+    <string name="nav_reunirse_cd">Reunir-se amb l\'equip</string>
     <string name="nav_soltar_armas">SOLTAR ARMES</string>
     <string name="nav_soltar_armas_cd">Soltar armes i acabar</string>
 
@@ -137,7 +137,7 @@
     <string name="labores_tab_terminados">Completats</string>
     <string name="labores_item_start_button">Comença</string>
     <string name="cd_task_done">Marcar tasca com a completada</string>
-    <string name="cd_task_start">Iniciar tasca</string>
+     <string name="cd_task_start">Iniciar tasca</string>
     <string name="cd_close">Tancar</string>
     <string name="cd_action">Acció</string>
 
@@ -148,23 +148,5 @@
     <string name="juego_completado_tiempo">Temps: %1$d segundos</string>
     <string name="juego_completado_puntos">Punts: %1$d</string>
 
-    <!-- Estado de la Partida -->
-    <string name="personal_game_state_title">Estat de la partida</string>
-    <string name="cd_menu">Obrir menu de partida</string>
-    <string name="game_code_label">Partida:</string>
-    <string name="game_code_value_format">Partida: %1$s</string>
-    <string name="game_time_label">Temps restant:</string>
-    <string name="game_time_value_format">Temps restant: %1$s</string>
-    <string name="players_progress_list_cd">Llista de progres dels jugadors</string>
-    <string name="player_percent_format">%1$d%%</string>
-    <string name="player_info_short">i</string>
-    <string name="player_info_button_default_cd">Veure informació del jugador</string>
-    <string name="player_info_button_cd">Veure informació de %1$s</string>
-    <string name="player_info_title">Informació del jugador</string>
-    <string name="player_profile_default_cd">Imatge de perfil del jugador</string>
-    <string name="player_profile_cd">Imatge de perfil de %1$s</string>
-    <string name="player_info_name_value">Nom: %1$s</string>
-    <string name="player_info_email_value">Correu: %1$s</string>
-    <string name="player_info_close">Tancar</string>
-
 </resources>
+

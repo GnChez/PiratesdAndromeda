@@ -10,6 +10,8 @@ import cat.hajoya.piratasdeandromeda.data.local.SessionManager
 import cat.hajoya.piratasdeandromeda.data.model.HabitacionBase
 import cat.hajoya.piratasdeandromeda.data.model.PartidaJoinRequest
 import cat.hajoya.piratasdeandromeda.data.model.PartidaPedido
+import cat.hajoya.piratasdeandromeda.data.model.WsNotification
+import cat.hajoya.piratasdeandromeda.data.network.WebSocketManager
 import cat.hajoya.piratasdeandromeda.data.repository.GameRepository
 import cat.hajoya.piratasdeandromeda.data.repository.ShipRepository
 import cat.hajoya.piratasdeandromeda.models.ConfigPartida
@@ -24,11 +26,13 @@ import cat.hajoya.piratasdeandromeda.models.RolJoc
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
@@ -38,6 +42,7 @@ class GameViewModel(
     private val shipRepository: ShipRepository,
     private val gameRepository: GameRepository,
     private val sessionManager: SessionManager,
+    private val webSocketManager: WebSocketManager? = null,
 ) : ViewModel() {
 
     private val _selectedShipId = kotlinx.coroutines.flow.MutableStateFlow<Long?>(null)
@@ -61,7 +66,7 @@ class GameViewModel(
         if (shipId != null) {
             shipRepository.getRoomsForShip(shipId)
         } else {
-            shipRepository.allRooms
+            kotlinx.coroutines.flow.flowOf(emptyList())
         }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
@@ -92,7 +97,25 @@ class GameViewModel(
     private val _habitacionsPartida = MutableLiveData<List<Habitacio>>()
     val habitacionsPartida: LiveData<List<Habitacio>> = _habitacionsPartida
 
-    fun selectShip(shipId: Long) {
+    private val _wsGameCode = MutableStateFlow<String?>(null)
+    val wsGameCode: StateFlow<String?> = _wsGameCode
+
+    private val _wsCode = MutableStateFlow<String?>(null)
+    val wsCode: StateFlow<String?> = _wsCode
+
+    private val _missionsByRoom = MutableStateFlow<Map<String, List<Int>>>(emptyMap())
+    val missionsByRoom: StateFlow<Map<String, List<Int>>> = _missionsByRoom
+
+    private val _playerScores = MutableStateFlow<Map<String, Int>>(emptyMap())
+    val playerScores: StateFlow<Map<String, Int>> = _playerScores
+
+    private val _wsNotifications = MutableSharedFlow<String>(replay = 0)
+    val wsNotifications = _wsNotifications.asSharedFlow()
+
+    private val _currentMissionStartTime = MutableStateFlow<Long?>(null)
+    val currentMissionStartTime: StateFlow<Long?> = _currentMissionStartTime
+
+    fun selectShip(shipId: Long?) {
         _selectedShipId.value = shipId
     }
 
@@ -208,6 +231,16 @@ class GameViewModel(
                 dificultad = Dificultad.MITJA,
             )
             _partidaActual.postValue(partida)
+            
+            // Guardar códigos y conectar WebSocket
+            _wsGameCode.value = response.codigoPartida
+            _wsCode.value = response.wsCode
+            _missionsByRoom.value = response.habitacionesMisiones
+            
+            // Conectar WebSocket
+            webSocketManager?.connect(response.codigoPartida, response.wsCode)
+            setupWebSocketListeners()
+            
             response.codigoPartida
         }
     }
@@ -217,7 +250,6 @@ class GameViewModel(
         if (trimmed.isEmpty()) return
         viewModelScope.launch(Dispatchers.IO) {
             val newId = shipRepository.addShip(trimmed)
-            _selectedShipId.value = newId
             // Emitir evento para notificar que la nave se creó exitosamente
             _shipCreatedEvent.emit(newId)
         }
@@ -272,8 +304,43 @@ class GameViewModel(
                 dificultad = Dificultad.MITJA,
             )
             _partidaActual.postValue(partida)
+            
+            // Guardar códigos y conectar WebSocket
+            _wsGameCode.value = codigoPartida
+            _wsCode.value = response.wsCode
+            
+            // Conectar WebSocket
+            webSocketManager?.connect(codigoPartida, response.wsCode)
+            setupWebSocketListeners()
+            
             response.wsCode
         }
+    }
+
+    private fun setupWebSocketListeners() {
+        webSocketManager?.let { manager ->
+            viewModelScope.launch {
+                // Escuchar notificaciones temporales
+                manager.notifications.collect { notification: WsNotification ->
+                    _wsNotifications.emit(notification.message)
+                }
+            }
+        }
+    }
+
+    fun sendMissionStarted(missionId: Int) {
+        _currentMissionStartTime.value = System.currentTimeMillis()
+        webSocketManager?.sendMissionStarted(missionId)
+    }
+
+    fun sendMissionCompleted(missionId: Int) {
+        _currentMissionStartTime.value = null
+        webSocketManager?.sendMissionCompleted(missionId)
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        webSocketManager?.disconnect()
     }
 }
 

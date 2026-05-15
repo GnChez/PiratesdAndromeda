@@ -114,5 +114,14 @@ data class WsMessage(
     @SerializedName("fecha_fin") val fechaFin: String?,
     @SerializedName("mission_id") val missionId: Int?,
     @SerializedName("id_usuario_afectado") val idUsuarioAfectado: Int?,
+    @SerializedName("scores") val scores: Map<String, Int>?,
+    @SerializedName("pontos") val puntos: Int?,
 )
 
+/** Notificación temporal del WebSocket. */
+data class WsNotification(
+    val type: String,
+    val message: String,
+    val timestamp: Long,
+    val durationMs: Long = 4000L,  // Duración por defecto de 4 segundos
+)

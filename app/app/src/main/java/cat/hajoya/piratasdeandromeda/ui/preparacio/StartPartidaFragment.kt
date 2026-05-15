@@ -34,6 +34,7 @@ class StartPartidaFragment : Fragment() {
         (requireActivity() as MainActivity).gameViewModelFactory
     }
     private val adapter = SavedShipAdapter({ ship -> viewModel.selectShip(ship.id) }, ::confirmDeleteShip)
+    private var lastNavigationShipId: Long? = null
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -89,9 +90,11 @@ class StartPartidaFragment : Fragment() {
                     viewModel.addSavedShip(shipName)
                     // Esperar el evento de creación
                     val shipId = viewModel.shipCreatedEvent.first()
-                    // Nave creada exitosamente, ahora navegar
+                    // Nave creada exitosamente, seleccionar la nave para navegar a configuración
                     binding.edShipName.text?.clear()
-                    openConfigHabitacionsScreen()
+                    binding.btnCrear.isEnabled = true
+                    // Seleccionar la nave (esto desencadenará la navegación automática)
+                    viewModel.selectShip(shipId)
                 } catch (e: Exception) {
                     // Manejar error
                     binding.btnCrear.isEnabled = true
@@ -151,9 +154,12 @@ class StartPartidaFragment : Fragment() {
                 launch {
                     viewModel.selectedShipId.collectLatest { selectedId ->
                         adapter.setSelectedId(selectedId)
-                        // Navegar a habitaciones si se selecciona una nave
-                        if (selectedId != null) {
+                        // Navegar a habitaciones solo si se selecciona una nave diferente a la última navigada
+                        if (selectedId != null && selectedId != lastNavigationShipId) {
+                            lastNavigationShipId = selectedId
                             openConfigHabitacionsScreen()
+                        } else if (selectedId == null) {
+                            lastNavigationShipId = null
                         }
                     }
                 }

@@ -11,8 +11,12 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.lifecycleScope
 import cat.hajoya.piratasdeandromeda.R
 import cat.hajoya.piratasdeandromeda.databinding.ActivityMenuGameBinding
+import cat.hajoya.piratasdeandromeda.viewmodels.GameViewModel
+import kotlinx.coroutines.launch
 
 /**
  * Fragment que muestra el menú principal del juego.
@@ -26,6 +30,8 @@ class MenuJuegoFragment : Fragment() {
 
     private var _binding: ActivityMenuGameBinding? = null
     private val binding get() = _binding!!
+    
+    private val gameViewModel: GameViewModel by activityViewModels()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -41,6 +47,13 @@ class MenuJuegoFragment : Fragment() {
         
         // Setup title con colores mixtos (accesibilidad)
         setupTitle()
+        
+        // Escuchar cambios en puntuaciones
+        lifecycleScope.launch {
+            gameViewModel.playerScores.collect { scores ->
+                updatePlayerScores(scores)
+            }
+        }
         
         // Setup button listeners
         setupButtonListeners()
@@ -82,6 +95,13 @@ class MenuJuegoFragment : Fragment() {
         binding.tvHeroTitle.isClickable = false
     }
 
+    private fun updatePlayerScores(scores: Map<String, Int>) {
+        if (scores.isNotEmpty()) {
+            val userPoints = scores.values.firstOrNull() ?: 0
+            binding.tvPuntosJugador.text = userPoints.toString()
+        }
+    }
+
     /**
      * Configura los listeners de los botones
      */
@@ -91,7 +111,11 @@ class MenuJuegoFragment : Fragment() {
         }
         
         binding.btnLabores.setOnClickListener {
-            // TODO: Navegar a labores
+            val userTasksFragment = UserTasksFragment.newInstance()
+            parentFragmentManager.beginTransaction()
+                .replace(R.id.fragment_container, userTasksFragment)
+                .addToBackStack(null)
+                .commit()
         }
         
         binding.btnReunirse.setOnClickListener {

@@ -1,13 +1,17 @@
 package cat.hajoya.piratasdeandromeda.data.network
 
 import cat.hajoya.piratasdeandromeda.data.model.WsMessage
+import cat.hajoya.piratasdeandromeda.data.model.WsNotification
 import com.google.gson.Gson
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import okhttp3.OkHttpClient
@@ -45,6 +49,15 @@ class WebSocketManager(
     private val _connectionState = MutableStateFlow(WsConnectionState.DISCONNECTED)
     val connectionState: StateFlow<WsConnectionState> = _connectionState.asStateFlow()
 
+    private val _notifications = MutableSharedFlow<WsNotification>(replay = 0)
+    val notifications: SharedFlow<WsNotification> = _notifications.asSharedFlow()
+
+    private val _playerScores = MutableStateFlow<Map<String, Int>>(emptyMap())
+    val playerScores: StateFlow<Map<String, Int>> = _playerScores.asStateFlow()
+
+    private val _missionsByRoom = MutableStateFlow<Map<String, List<Int>>>(emptyMap())
+    val missionsByRoom: StateFlow<Map<String, List<Int>>> = _missionsByRoom.asStateFlow()
+
     private var webSocket: WebSocket? = null
     private var isManualDisconnect = false
     private var reconnectAttempts = 0
@@ -71,6 +84,31 @@ class WebSocketManager(
         payload["action"] = action
         payload.putAll(extraFields)
         webSocket?.send(gson.toJson(payload))
+    }
+
+    /** Envía evento de inicio de misión. */
+    fun sendMissionStarted(missionId: Int) {
+        send(MISION_INICIADA, mapOf("mission_id" to missionId))
+    }
+
+    /** Envía evento de misión completada. */
+    fun sendMissionCompleted(missionId: Int) {
+        send(MISION_COMPLETADA, mapOf("mission_id" to missionId))
+    }
+
+    /** Envía evento de reunión de emergencia. */
+    fun sendEmergencyReunion() {
+        send(REUNION_EMERGENCIA)
+    }
+
+    /** Envía voto. */
+    fun sendVote(targetPlayerId: Int? = null) {
+        val fields = if (targetPlayerId != null) {
+            mapOf("id_usuario_afectado" to targetPlayerId)
+        } else {
+            emptyMap()
+        }
+        send(VOTO, fields)
     }
 
     /** Cierra la conexión actual de forma explícita. */
@@ -112,7 +150,46 @@ class WebSocketManager(
 
         override fun onMessage(webSocket: WebSocket, text: String) {
             try {
-                _messages.value = gson.fromJson(text, WsMessage::class.java)
+                val message = gson.fromJson(text, WsMessage::class.java)
+                _messages.value = message
+
+                // Procesar tipos específicos de mensaje
+                when {
+                    message.type == "GAME_STARTED" -> {
+                        message.distribucionMisiones?.let {
+                            _missionsByRoom.value = it
+                        }
+                    }
+                    message.type == "START_MISSION" || 
+                    message.type == "COMPLETE_MISSION" ||
+                    message.type == "PLAYER_DIED" ||
+                    message.type == "REUNION_EMERGENCIA" -> {
+                        // Emitir notificación temporal
+                        scope.launch {
+                            _notifications.emit(
+                                WsNotification(
+                                    type = message.type ?: "EVENT",
+                                    message = message.message ?: "Actualización del juego",
+                                    timestamp = System.currentTimeMillis()
+                                )
+                            )
+                        }
+                    }
+                }
+
+                // Actualizar puntuaciones si vienen en el mensaje
+                message.scores?.let { scores ->
+                    _playerScores.value = scores
+                }
+                
+                // También capturar puntos individuales si se envían de otra manera
+                if (message.puntos != null) {
+                    val currentScores = _playerScores.value.toMutableMap()
+                    message.player?.toString()?.let { playerId ->
+                        currentScores[playerId] = message.puntos
+                        _playerScores.value = currentScores
+                    }
+                }
             } catch (_: Exception) {
                 // Si llega un payload no parseable, no rompemos la sesión.
             }
