@@ -8,8 +8,8 @@ import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.activityViewModels
 import cat.hajoya.piratasdeandromeda.R
 import cat.hajoya.piratasdeandromeda.databinding.ExitGameFrBinding
+import cat.hajoya.piratasdeandromeda.ui.preparacio.StartPartidaFragment
 import cat.hajoya.piratasdeandromeda.viewmodels.GameViewModel
-
 
 class ExitGameDialogFragment : DialogFragment() {
 
@@ -45,7 +45,7 @@ class ExitGameDialogFragment : DialogFragment() {
         parentFragmentManager.popBackStack(null, androidx.fragment.app.FragmentManager.POP_BACK_STACK_INCLUSIVE)
 
         parentFragmentManager.beginTransaction()
-            .replace(R.id.fragment_container, ConfigPartFragment())
+            .replace(R.id.fragment_container, StartPartidaFragment())
             .commit()
 
         dismiss()
@@ -61,6 +61,5 @@ class ExitGameDialogFragment : DialogFragment() {
         fun newInstance() = ExitGameDialogFragment()
     }
 }
-
 
 
