@@ -29,6 +29,7 @@ const EVENT_LABELS = {
   PLAYER_DIED: "Jugador eliminado",
   PLAYER_JOINED: "Jugador unido",
   PLAYER_LEFT: "Jugador salió",
+  SCORE_UPDATED: "Puntuación actualizada",
   VOTE_CAST: "Voto emitido",
   REUNION: "Reunión de emergencia",
   REUNION_FINISHED: "Reunión finalizada",
@@ -185,6 +186,25 @@ const GameMonitor = ({ gameCode, wsUrl: wsUrlProp, onBack }) => {
           ...current,
           name,
           score: current.score + points,
+          connected: true,
+        },
+      };
+    });
+  }, []);
+
+  const setPlayerScore = useCallback((playerId, playerName, score) => {
+    if (playerId === undefined || playerId === null || !Number.isFinite(score)) return;
+    const key = String(playerId);
+    const fromRef = playerDisplayNamesRef.current[key];
+    const name = playerName || fromRef || `Jugador ${key}`;
+    setPlayers((prev) => {
+      const current = prev[key] || { id: key, name, score: 0, connected: true };
+      return {
+        ...prev,
+        [key]: {
+          ...current,
+          name,
+          score,
           connected: true,
         },
       };
@@ -351,6 +371,14 @@ const GameMonitor = ({ gameCode, wsUrl: wsUrlProp, onBack }) => {
       });
     }
 
+    if (
+      eventType === "SCORE_UPDATED" &&
+      msg.player != null &&
+      Number.isFinite(msg.puntos_partida)
+    ) {
+      setPlayerScore(msg.player, nameHint || undefined, Number(msg.puntos_partida));
+    }
+
     if (eventType === "GAME_STARTED") {
       setRunning(true);
     }
@@ -381,7 +409,7 @@ const GameMonitor = ({ gameCode, wsUrl: wsUrlProp, onBack }) => {
     }
 
     appendEvent(eventLabel, eventText);
-  }, [addScore, appendEvent, ensurePlayer]);
+  }, [addScore, appendEvent, ensurePlayer, setPlayerScore]);
 
   useEffect(() => {
     setStatus("connecting");

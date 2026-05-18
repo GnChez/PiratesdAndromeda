@@ -1,6 +1,7 @@
 import asyncio
 from collections import Counter
 from contextlib import asynccontextmanager
+from datetime import datetime
 from typing import Optional
 
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
@@ -10,6 +11,7 @@ from sqlmodel import Session
 import CRUD.games as games_crud
 import CRUD.look_up as lookup
 import CRUD.missions as missions_crud
+import CRUD.users as users_crud
 from CRUD.events import (
     ALLOWED_GAME_EVENT_TYPES,
     create_game_event_by_type,
@@ -33,6 +35,7 @@ from services.games import PartidasService
 
 
 REUNION_DURATION_SECONDS = 60 * 5
+KILL_REWARD_POINTS = 50
 _active_reunions: dict[str, dict[str, object]] = {}
 _reunion_lock = asyncio.Lock()
 
@@ -342,14 +345,58 @@ async def _publish_mission_update(
         print(f"⚠️ No se pudo publicar evento MQTT de misión ({mqtt_event}): {mqtt_error}")
 
 
+async def _broadcast_score_updated(
+    db: Session,
+    room_uuid: str,
+    game_id: int,
+    player_score,
+) -> None:
+    if player_score is None:
+        return
+    await manager.broadcast_to_room(
+        {
+            "type": "SCORE_UPDATED",
+            "player": str(player_score.id_usuario),
+            "puntos_partida": int(player_score.puntos_partida or 0),
+            "misiones_completadas": int(player_score.misiones_completadas or 0),
+            "sabotajes_realizados": int(player_score.sabotajes_realizados or 0),
+            "eliminaciones_realizadas": int(player_score.eliminaciones_realizadas or 0),
+            "scores": games_crud.get_game_scores(db, game_id),
+        },
+        room_uuid,
+    )
+
+
 async def _sabotage_mission(
     db: Session,
+    player_id: Optional[int],
     player_key: str,
     room_uuid: str,
     game_code: str,
     mission_id: int,
 ):
+    player_score = None
+    game_id_for_score = None
+    mission_state = missions_crud.get_mission_player_row(db, mission_id)
+    sabotaged_before = (
+        mission_state is not None and mission_state.id_estado_mision == 5
+    )
     missions_crud.update_mission_sabotage(db, mission_id)
+    mission = missions_crud.get_mission_by_game_mission_id(db, mission_id)
+    game_mission = missions_crud.get_game_mission_row(db, mission_id)
+    if (
+        not sabotaged_before
+        and player_id is not None
+        and mission is not None
+        and game_mission is not None
+    ):
+        player_score = games_crud.award_player_sabotage_points(
+            db,
+            game_mission.id_partida,
+            player_id,
+            int(mission.puntos_sabotaje or 0),
+        )
+        game_id_for_score = game_mission.id_partida
     await manager.broadcast_to_room(
         {
             "type": "SABOTAGE",
@@ -358,6 +405,8 @@ async def _sabotage_mission(
         },
         room_uuid,
     )
+    if game_id_for_score is not None:
+        await _broadcast_score_updated(db, room_uuid, game_id_for_score, player_score)
     await _publish_mission_update(game_code, "sabotaged", player_key, mission_id)
 
 
@@ -406,13 +455,28 @@ async def _complete_mission(
     game_code: str,
     mission_id: int,
 ):
+    player_score = None
+    game_id_for_score = None
+    mission_state = missions_crud.get_mission_player_row(db, mission_id)
+    completed_before = (
+        mission_state is not None and mission_state.id_estado_mision == 3
+    )
     missions_crud.update_mission_completion(db, mission_id)
     mission = missions_crud.get_mission_by_game_mission_id(db, mission_id)
     game_mission = missions_crud.get_game_mission_row(db, mission_id)
     if mission is not None and game_mission is not None:
-        games_crud.update_reparacion_partida(
-            db, game_mission.id_partida, mission.porcentaje_reparacion
-        )
+        if not completed_before:
+            games_crud.update_reparacion_partida(
+                db, game_mission.id_partida, mission.porcentaje_reparacion
+            )
+            if mission_state is not None:
+                player_score = games_crud.award_player_mission_points(
+                    db,
+                    game_mission.id_partida,
+                    mission_state.id_jugador,
+                    int(mission.puntos_otorgados or 0),
+                )
+                game_id_for_score = game_mission.id_partida
     await manager.broadcast_to_room(
         {
             "type": "COMPLETE_MISSION",
@@ -421,16 +485,23 @@ async def _complete_mission(
         },
         room_uuid,
     )
+    if game_id_for_score is not None:
+        await _broadcast_score_updated(db, room_uuid, game_id_for_score, player_score)
     await _publish_mission_update(game_code, "completed", player_key, mission_id)
 
 
 async def _broadcast_game_started(room_uuid: str, game_id: int, started: object) -> None:
+    with Session(engine) as db:
+        game = games_crud.get_game_by_id(db, game_id)
+    time_limit_seconds = int(getattr(game, "tiempo_limite_minutos", 60) or 60) * 60
     await manager.broadcast_to_room(
         {
             "type": "GAME_STARTED",
             "id_partida": game_id,
             "impostor_actual": getattr(started, "impostor_actual", None),
             "distribucion_misiones": getattr(started, "distribucion_misiones", {}),
+            "time_remaining": time_limit_seconds,
+            "remaining_time": time_limit_seconds,
         },
         room_uuid,
     )
@@ -495,6 +566,13 @@ async def websocket_endpoint(websocket: WebSocket, game_code: str, ws_code: str)
     game_id = game.id_partida
     is_creator = game.id_creador == player_id
     player_key = _player_public_id(player_id, ws_code)
+    with Session(engine) as db:
+        player_user = users_crud.get_user(db, player_id)
+    player_name = (
+        str(player_user.nombre_usuario)
+        if player_user is not None and player_user.nombre_usuario
+        else player_key
+    )
 
     await manager.connect_player(websocket, room_uuid)
 
@@ -502,6 +580,8 @@ async def websocket_endpoint(websocket: WebSocket, game_code: str, ws_code: str)
         "event": "PLAYER_JOINED",
         "player": player_key,
         "room": room_uuid,
+        "nombre_usuario": player_name,
+        "player_name": player_name,
     }, room_uuid)
 
     handled_exit = False
@@ -526,14 +606,42 @@ async def websocket_endpoint(websocket: WebSocket, game_code: str, ws_code: str)
 
             elif action == "jugador_eliminado":
                 target = _parse_int(data.get("id_usuario_afectado"))
+                score_update = None
                 if target is not None:
                     with Session(engine) as db:
+                        target_row = games_crud.get_player_row(db, game_id, target)
+                        was_alive = bool(target_row and target_row.jugador_vivo)
                         games_crud.mark_player_dead(db, game_id, target, killed_by=player_id)
+                        if was_alive and target != player_id:
+                            player_score = games_crud.award_player_kill_points(
+                                db,
+                                game_id,
+                                player_id,
+                                KILL_REWARD_POINTS,
+                            )
+                            if player_score is not None:
+                                score_update = {
+                                    "type": "SCORE_UPDATED",
+                                    "player": str(player_score.id_usuario),
+                                    "puntos_partida": int(player_score.puntos_partida or 0),
+                                    "misiones_completadas": int(
+                                        player_score.misiones_completadas or 0
+                                    ),
+                                    "sabotajes_realizados": int(
+                                        player_score.sabotajes_realizados or 0
+                                    ),
+                                    "eliminaciones_realizadas": int(
+                                        player_score.eliminaciones_realizadas or 0
+                                    ),
+                                    "scores": games_crud.get_game_scores(db, game_id),
+                                }
                 await manager.broadcast_to_room({
                     "type": "PLAYER_DIED",
                     "player": player_key,
                     "target_player": str(target) if target is not None else None,
                 }, room_uuid)
+                if score_update is not None:
+                    await manager.broadcast_to_room(score_update, room_uuid)
 
             elif action == "mision_saboteada":
                 with Session(engine) as db:
@@ -563,7 +671,7 @@ async def websocket_endpoint(websocket: WebSocket, game_code: str, ws_code: str)
                         )
                     else:
                         await _sabotage_mission(
-                            db, player_key, room_uuid, game_code, mission_id
+                            db, player_id, player_key, room_uuid, game_code, mission_id
                         )
             elif action == "mision_desaboteada":
                 mission_id = _parse_int(data.get("mission_id"))
@@ -730,7 +838,61 @@ async def monitor_websocket_endpoint(websocket: WebSocket, game_code: str):
 
     await manager.connect_monitor(websocket, room_uuid)
     try:
-        await websocket.send_json({"type": "MONITOR_CONNECTED", "game_code": game_code})
+        with Session(engine) as db:
+            live_game = games_crud.get_game_by_code(db, game_code)
+            estado_en_curso = lookup.get_game_state(db, "en_curso")
+            player_rows = games_crud.player_game(db, live_game.id_partida) if live_game else []
+            scores = (
+                games_crud.get_game_scores(db, live_game.id_partida)
+                if live_game
+                else {}
+            )
+            player_names: dict[str, str] = {}
+            connected_players: list[dict[str, object]] = []
+            for row in player_rows:
+                user = users_crud.get_user(db, row.id_usuario)
+                display_name = (
+                    str(user.nombre_usuario)
+                    if user is not None and user.nombre_usuario
+                    else str(row.id_usuario)
+                )
+                player_id = str(row.id_usuario)
+                player_names[player_id] = display_name
+                connected_players.append(
+                    {
+                        "player": player_id,
+                        "nombre_usuario": display_name,
+                        "player_name": display_name,
+                        "connected": True,
+                    }
+                )
+
+        game_in_progress = (
+            live_game is not None
+            and estado_en_curso is not None
+            and live_game.id_estado_partida == estado_en_curso.id_estado_partida
+        )
+        total_seconds = int(getattr(live_game, "tiempo_limite_minutos", 60) or 60) * 60
+        time_remaining = total_seconds
+        if game_in_progress and getattr(live_game, "fecha_inicio", None):
+            elapsed = int((datetime.utcnow() - live_game.fecha_inicio).total_seconds())
+            time_remaining = max(0, total_seconds - elapsed)
+
+        await websocket.send_json(
+            {
+                "type": "MONITOR_CONNECTED",
+                "game_code": game_code,
+                "game_in_progress": game_in_progress,
+                "time_remaining": time_remaining if game_in_progress else None,
+                "remaining_time": time_remaining if game_in_progress else None,
+                "progress": float(live_game.porcentaje_reparacion_actual or 0)
+                if live_game is not None
+                else 0,
+                "scores": scores,
+                "player_names": player_names,
+                "connected_players": connected_players,
+            }
+        )
         while True:
             # El monitor es de solo lectura; mantenemos la conexión viva.
             await websocket.receive_text()

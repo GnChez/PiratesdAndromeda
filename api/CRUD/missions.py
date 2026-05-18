@@ -36,6 +36,43 @@ def get_game_mission_row(db: Session, mission_game_id: int) -> MisionesPartida |
     ).first()
 
 
+def resolve_mision_partida_instance_id(
+    db: Session,
+    game_id: int,
+    player_id: int,
+    mission_ref: int,
+) -> int | None:
+    by_instance = db.exec(
+        select(MisionesPartidaJugador.id_mision_partida)
+        .join(
+            MisionesPartida,
+            MisionesPartida.id_mision_partida
+            == MisionesPartidaJugador.id_mision_partida,
+        )
+        .where(
+            MisionesPartida.id_partida == game_id,
+            MisionesPartidaJugador.id_jugador == player_id,
+            MisionesPartidaJugador.id_mision_partida == mission_ref,
+        )
+    ).first()
+    if by_instance is not None:
+        return by_instance
+
+    return db.exec(
+        select(MisionesPartidaJugador.id_mision_partida)
+        .join(
+            MisionesPartida,
+            MisionesPartida.id_mision_partida
+            == MisionesPartidaJugador.id_mision_partida,
+        )
+        .where(
+            MisionesPartida.id_partida == game_id,
+            MisionesPartidaJugador.id_jugador == player_id,
+            MisionesPartida.id_mision == mission_ref,
+        )
+    ).first()
+
+
 def get_random_sabotage_candidate_by_game(
     db: Session, game_id: int
 ) -> tuple[int, bool] | None:
@@ -71,6 +108,10 @@ def _get_mision_partida_jugador(db: Session, mission_id: int) -> MisionesPartida
             MisionesPartidaJugador.id_mision_partida == mission_id
         )
     ).first()
+
+
+def get_mission_player_row(db: Session, mission_id: int) -> MisionesPartidaJugador | None:
+    return _get_mision_partida_jugador(db, mission_id)
 
 
 def update_mission_start_time(db: Session, mission_id: int) -> MisionesPartidaJugador | None:
