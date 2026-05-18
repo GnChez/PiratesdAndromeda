@@ -6,42 +6,49 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.tabs.TabLayout
 import cat.hajoya.piratasdeandromeda.R
 import cat.hajoya.piratasdeandromeda.databinding.UserTasksFragmentBinding
+import cat.hajoya.piratasdeandromeda.models.RolJoc
+import cat.hajoya.piratasdeandromeda.models.UserTaskUi
+import cat.hajoya.piratasdeandromeda.ui.main.MainActivity
 import cat.hajoya.piratasdeandromeda.viewmodels.GameViewModel
 import kotlinx.coroutines.launch
 
 /**
  * Fragment que muestra la lista de tareas del usuario.
- * Permite filtrar por estado (todos, pendientes, completados) y comenzar tareas.
+ *
+ * Novedades respecto al original:
+ * - Si el jugador es IMPOSTOR, se muestra un botón "Sabotear" que abre RoomSabotageDialogFragment
+ * - Si viene de RoomFragment (roomId != null), el botón X vuelve a RoomFragment en lugar del menu
+ * - Observa wsNotifications para mostrar SabotageAlertDialogFragment cuando llega un evento de sabotaje
  */
 class UserTasksFragment : Fragment() {
 
     private var _binding: UserTasksFragmentBinding? = null
     private val binding get() = _binding!!
-    
-    private val gameViewModel: GameViewModel by activityViewModels()
+
+    private val gameViewModel: GameViewModel by activityViewModels {
+        (requireActivity() as MainActivity).gameViewModelFactory
+    }
 
     private val adapter = UserTaskAdapter(
         onStartTask = ::onStartTask,
         onTaskStatusChanged = ::onTaskStatusChanged,
     )
 
-    // Lista de tareas (en un proyecto real, vendría del ViewModel/Repository)
-    private val allTasks = listOf(
-        UserTaskUi(1L, "Arregla luces", "Reparar el sistema de iluminación", false, 30),
-        UserTaskUi(2L, "Limpia cubierta", "Barrer y limpiar la cubierta principal", false, 45),
-        UserTaskUi(3L, "Repara velas", "Costura y reparación de velas dañadas", true, 60),
-        UserTaskUi(4L, "Revisa barriles", "Inspecciona el estado de los barriles de agua", false, 20),
-        UserTaskUi(5L, "Organiza bodega", "Ordena la carga en la bodega", true, 40),
-        UserTaskUi(6L, "Pinta casco", "Retocar la pintura del casco", false, 50),
-    )
-
+    private val modifiedTasks = mutableMapOf<Long, UserTaskUi>()
     private var currentFilter = FilterType.TODOS
-    private var modifiedTasks = mutableMapOf<Long, UserTaskUi>()
+    private var roomId: Int? = null
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        roomId = arguments?.getInt(ARG_ROOM_ID, -1).takeIf { it != -1 }
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -58,14 +65,8 @@ class UserTasksFragment : Fragment() {
         setupRecyclerView()
         setupTabListener()
         setupCloseButton()
-        updateFilteredTasks()
-        
-        // Escuchar cambios en puntuaciones
-        lifecycleScope.launch {
-            gameViewModel.playerScores.collect { scores ->
-                updatePlayerScores(scores)
-            }
-        }
+        setupImpostorButton()
+        observeViewModel()
     }
 
     private fun setupRecyclerView() {
@@ -82,9 +83,8 @@ class UserTasksFragment : Fragment() {
                     2 -> FilterType.TERMINADOS
                     else -> FilterType.TODOS
                 }
-                updateFilteredTasks()
+                updateFilteredTasks(gameViewModel.myMissions.value)
             }
-
             override fun onTabUnselected(tab: TabLayout.Tab?) {}
             override fun onTabReselected(tab: TabLayout.Tab?) {}
         })
@@ -94,30 +94,90 @@ class UserTasksFragment : Fragment() {
         binding.btnClose.setOnClickListener {
             parentFragmentManager.popBackStack()
         }
-
     }
 
-    private fun updateFilteredTasks() {
-        val getTasks = {
-            val tasksToUse = allTasks.map { original ->
-                modifiedTasks[original.id] ?: original
-            }
+    /**
+     * Muestra el botón de sabotaje SOLO si el jugador es IMPOSTOR.
+     * El rol viene de jugadorActual en el ViewModel.
+     */
+    private fun setupImpostorButton() {
+        val jugador = gameViewModel.jugadorActual.value
+        val esImpostor = jugador?.rol == RolJoc.IMPOSTOR
 
-            when (currentFilter) {
-                FilterType.TODOS -> tasksToUse
-                FilterType.PENDIENTES -> tasksToUse.filter { !it.completada }
-                FilterType.TERMINADOS -> tasksToUse.filter { it.completada }
+        // El layout user_tasks_fragment debe tener btnSabotear con visibility="gone" por defecto
+        binding.btnSabotear?.let { btn ->
+            btn.visibility = if (esImpostor) View.VISIBLE else View.GONE
+            btn.setOnClickListener {
+                RoomSabotageDialogFragment.newInstance()
+                    .show(parentFragmentManager, RoomSabotageDialogFragment.TAG)
             }
         }
 
-        val filteredTasks = getTasks()
-        adapter.submitList(filteredTasks)
-        binding.tvEmpty.visibility = if (filteredTasks.isEmpty()) View.VISIBLE else View.GONE
+        // También observar cambios de rol en tiempo real (por si llega por WS)
+        gameViewModel.jugadorActual.observe(viewLifecycleOwner) { jugadorActualizado ->
+            val impostor = jugadorActualizado?.rol == RolJoc.IMPOSTOR
+            binding.btnSabotear?.visibility = if (impostor) View.VISIBLE else View.GONE
+        }
+    }
+
+    private fun observeViewModel() {
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+
+                launch {
+                    gameViewModel.myMissions.collect { missions ->
+                        updateFilteredTasks(missions)
+                    }
+                }
+
+                launch {
+                    gameViewModel.playerScores.collect { scores ->
+                        updatePlayerScores(scores)
+                    }
+                }
+
+                // Escuchar notificaciones de sabotaje desde WebSocket
+                launch {
+                    gameViewModel.wsNotifications.collect { notification ->
+                        if (notification.contains("sabotage", ignoreCase = true) ||
+                            notification.contains("sabotej", ignoreCase = true)) {
+                            showSabotageAlert(notification)
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private fun showSabotageAlert(notification: String) {
+        // Extraer nombre de sala si viene en la notificación, si no null
+        val roomName = extractRoomName(notification)
+        if (!isAdded || parentFragmentManager.isStateSaved) return
+
+        SabotageAlertDialogFragment.newInstance(roomName)
+            .show(parentFragmentManager, SabotageAlertDialogFragment.TAG)
+    }
+
+    private fun extractRoomName(notification: String): String? {
+        // El formato esperado del WS podría ser "sabotage:NombreSala" o similar
+        return if (notification.contains(":")) {
+            notification.substringAfter(":").trim().ifEmpty { null }
+        } else null
+    }
+
+    private fun updateFilteredTasks(missions: List<UserTaskUi>) {
+        val tasksToUse = missions.map { modifiedTasks[it.id] ?: it }
+        val filtered = when (currentFilter) {
+            FilterType.TODOS -> tasksToUse
+            FilterType.PENDIENTES -> tasksToUse.filter { !it.completada }
+            FilterType.TERMINADOS -> tasksToUse.filter { it.completada }
+        }
+        adapter.submitList(filtered)
+        binding.tvEmpty.visibility = if (filtered.isEmpty()) View.VISIBLE else View.GONE
     }
 
     private fun onStartTask(task: UserTaskUi) {
-        // Navegar a la pantalla de juego en proceso
-        val gameFragment = ProcessGameFragment.newInstance(task.id, task.nombre, task.duracionEstimada)
+        val gameFragment = ProcessGameFragment.newInstance(task.id, task.nombre)
         parentFragmentManager.beginTransaction()
             .replace(R.id.fragment_container, gameFragment)
             .addToBackStack(null)
@@ -125,16 +185,12 @@ class UserTasksFragment : Fragment() {
     }
 
     private fun onTaskStatusChanged(task: UserTaskUi, isCompleted: Boolean) {
-        val updatedTask = task.copy(completada = isCompleted)
-        modifiedTasks[task.id] = updatedTask
-        updateFilteredTasks()
+        modifiedTasks[task.id] = task.copy(completada = isCompleted)
+        updateFilteredTasks(gameViewModel.myMissions.value)
     }
 
     private fun updatePlayerScores(scores: Map<String, Int>) {
-        if (scores.isNotEmpty()) {
-            val userPoints = scores.values.firstOrNull() ?: 0
-            binding.tvPuntosJugador.text = userPoints.toString()
-        }
+        binding.tvPuntosJugador.text = gameViewModel.getMyPoints(scores).toString()
     }
 
     override fun onDestroyView() {
@@ -147,10 +203,14 @@ class UserTasksFragment : Fragment() {
     }
 
     companion object {
+        private const val ARG_ROOM_ID = "room_id"
+
+        /** Desde btnLabores del menu (sin sala seleccionada) */
         fun newInstance() = UserTasksFragment()
+
+        /** Desde RoomFragment con sala seleccionada */
+        fun newInstance(roomId: Int) = UserTasksFragment().apply {
+            arguments = Bundle().apply { putInt(ARG_ROOM_ID, roomId) }
+        }
     }
 }
-
-
-
-

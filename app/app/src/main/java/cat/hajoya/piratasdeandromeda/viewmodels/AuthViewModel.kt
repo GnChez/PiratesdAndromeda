@@ -27,8 +27,9 @@ class AuthViewModel(
     private val _errorMessage = MutableLiveData<String?>()
     val errorMessage: LiveData<String?> = _errorMessage
 
-    fun login(email: String, password: String) {
-        if (email.isEmpty() || password.isEmpty()) {
+    fun login(userInput: String, password: String) {
+
+        if (userInput.isEmpty() || password.isEmpty()) {
             _errorMessage.value = "Por favor completa todos los campos"
             _authState.value = AuthState.ERROR
             return
@@ -37,23 +38,27 @@ class AuthViewModel(
         _authState.value = AuthState.LOADING
 
         viewModelScope.launch(Dispatchers.IO) {
+
             try {
-                // Crear request con email y password
+
+                val isEmail = userInput.contains("@")
+
                 val request = UserCreate(
-                    nombreUsuario = email.substringBefore("@"), // Extender username del email
-                    email = email,
+                    nombreUsuario = if (isEmail) "" else userInput,
+                    email = if (isEmail) userInput else "example@example.pr",
                     password = password
                 )
-                // Llamar al endpoint de login
+
                 val userResponse = apiService.login(request)
-                
-                // Mapear respuesta a modelo local
-                val role = when {
-                    email.contains("admin", ignoreCase = true) -> RolUsuari.ADMIN
-                    email.contains("trab", ignoreCase = true) -> RolUsuari.TREBALLADOR
+
+                // Mapear id_rol_sistema a RolUsuari
+                val role = when (userResponse.idRolSistema) {
+                    1 -> RolUsuari.JUGADOR
+                    2 -> RolUsuari.TREBALLADOR
+                    3 -> RolUsuari.ADMIN
                     else -> RolUsuari.JUGADOR
                 }
-                
+
                 val user = User(
                     id = userResponse.idUsuario,
                     username = userResponse.nombreUsuario,
@@ -61,23 +66,33 @@ class AuthViewModel(
                     rol = role,
                     avatar = userResponse.avatarUrl
                 )
-                
+
                 _currentUser.postValue(user)
                 _authState.postValue(AuthState.SUCCESS)
                 _errorMessage.postValue(null)
+
                 persistSession(user)
+
             } catch (_: SocketTimeoutException) {
+
                 _authState.postValue(AuthState.ERROR)
-                _errorMessage.postValue("La API no responde a tiempo. Revisa tu conexión a internet o que el servidor esté disponible.")
+                _errorMessage.postValue(
+                    "La API no responde a tiempo. Revisa tu conexión a internet o que el servidor esté disponible."
+                )
+
                 _currentUser.postValue(null)
-            } catch (_: Exception) {
+
+            } catch (e: Exception) {
+
                 _authState.postValue(AuthState.ERROR)
-                _errorMessage.postValue("Error en login: Desconocido")
+                _errorMessage.postValue(
+                    "Error en login: ${e.message}"
+                )
+
                 _currentUser.postValue(null)
             }
         }
     }
-
     fun register(username: String, email: String, password: String) {
         if (username.isEmpty() || email.isEmpty() || password.isEmpty()) {
             _errorMessage.value = "Por favor completa todos los campos"
@@ -98,10 +113,11 @@ class AuthViewModel(
                 // Llamar al endpoint de registro
                 val userResponse = apiService.register(request)
                 
-                // Mapear respuesta a modelo local
-                val role = when {
-                    email.contains("admin", ignoreCase = true) -> RolUsuari.ADMIN
-                    email.contains("trab", ignoreCase = true) -> RolUsuari.TREBALLADOR
+                // Mapear id_rol_sistema a RolUsuari
+                val role = when (userResponse.idRolSistema) {
+                    1 -> RolUsuari.JUGADOR
+                    2 -> RolUsuari.TREBALLADOR
+                    3 -> RolUsuari.ADMIN
                     else -> RolUsuari.JUGADOR
                 }
                 
@@ -147,6 +163,13 @@ class AuthViewModel(
             sessionManager.saveUserId(user.id)
             sessionManager.saveNombreUsuario(user.username)
             sessionManager.saveEmail(user.email)
+            // Mapear RolUsuari a id_rol_sistema
+            val roleId = when (user.rol) {
+                RolUsuari.JUGADOR -> 1
+                RolUsuari.TREBALLADOR -> 2
+                RolUsuari.ADMIN -> 3
+            }
+            sessionManager.saveUserRole(roleId)
         }
     }
 }

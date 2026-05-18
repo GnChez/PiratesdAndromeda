@@ -9,6 +9,7 @@ import cat.hajoya.piratasdeandromeda.R
 import cat.hajoya.piratasdeandromeda.databinding.ActivityMainBinding
 import cat.hajoya.piratasdeandromeda.data.local.AppDatabase
 import cat.hajoya.piratasdeandromeda.data.local.SessionManager
+import cat.hajoya.piratasdeandromeda.data.network.WebSocketManager
 import cat.hajoya.piratasdeandromeda.data.repository.GameRepository
 import cat.hajoya.piratasdeandromeda.data.repository.ShipRepository
 import cat.hajoya.piratasdeandromeda.ui.preparacio.StartPartidaFragment
@@ -26,7 +27,9 @@ class MainActivity : AppCompatActivity() {
             override fun <T : ViewModel> create(modelClass: Class<T>): T {
                 if (modelClass.isAssignableFrom(cat.hajoya.piratasdeandromeda.viewmodels.GameViewModel::class.java)) {
                     @Suppress("UNCHECKED_CAST")
-                    return cat.hajoya.piratasdeandromeda.viewmodels.GameViewModel(shipRepo, gameRepo, sessionManager) as T
+                    return cat.hajoya.piratasdeandromeda.viewmodels.GameViewModel(shipRepo, gameRepo, sessionManager,
+                        WebSocketManager()
+                    ) as T
                 }
                 throw IllegalArgumentException("Unknown ViewModel class")
             }

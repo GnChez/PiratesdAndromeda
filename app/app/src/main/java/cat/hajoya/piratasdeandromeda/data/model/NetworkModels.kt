@@ -1,6 +1,9 @@
 package cat.hajoya.piratasdeandromeda.data.model
 
 import com.google.gson.annotations.SerializedName
+import com.google.gson.JsonDeserializer
+import com.google.gson.JsonElement
+import java.lang.reflect.Type
 
 /** Body de alta/login de usuario. */
 data class UserCreate(
@@ -43,7 +46,7 @@ data class PartidaInitialResponse(
     @SerializedName("id_partida") val idPartida: Int,
     @SerializedName("codigo_partida") val codigoPartida: String,
     @SerializedName("id_estado_partida") val idEstadoPartida: Int,
-    @SerializedName("habitaciones_misiones") val habitacionesMisiones: Map<String, List<Int>>,
+    @SerializedName("habitaciones_misiones") val habitacionesMisiones: Map<String, Any>,
     @SerializedName("ws_code") val wsCode: String,
     @SerializedName("ws_room_code") val wsRoomCode: String,
 )
@@ -78,7 +81,7 @@ data class PartidaStartResponse(
     @SerializedName("id_partida") val idPartida: Int,
     @SerializedName("id_estado_partida") val idEstadoPartida: Int,
     @SerializedName("impostor_actual") val impostorActual: Int?,
-    @SerializedName("distribucion_misiones") val distribucionMisiones: Map<String, List<Int>>,
+    @SerializedName("distribucion_misiones") val distribucionMisiones: Map<String, Any>,
 )
 
 /** Request de finalización de partida. */
@@ -109,14 +112,47 @@ data class WsMessage(
     @SerializedName("votes") val votes: Any?,
     @SerializedName("id_partida") val idPartida: Int?,
     @SerializedName("impostor_actual") val impostorActual: Int?,
-    @SerializedName("distribucion_misiones") val distribucionMisiones: Map<String, List<Int>>?,
+    @SerializedName("distribucion_misiones") val distribucionMisiones: Any?,
     @SerializedName("ganador_tripulacion") val ganadorTripulacion: Boolean?,
     @SerializedName("fecha_fin") val fechaFin: String?,
     @SerializedName("mission_id") val missionId: Int?,
     @SerializedName("id_usuario_afectado") val idUsuarioAfectado: Int?,
-    @SerializedName("scores") val scores: Map<String, Int>?,
-    @SerializedName("pontos") val puntos: Int?,
-)
+    @SerializedName("scores") val scores: Any?,
+    @SerializedName("puntos") val puntos: Int?,    @SerializedName("connected_players") val connectedPlayers: Any?,
+    @SerializedName("game_code") val gameCode: String?,
+    @SerializedName("game_in_progress") val gameInProgress: Boolean?,
+    @SerializedName("progress") val progress: Int?,
+    @SerializedName("time_limit_seconds") val timeLimitSeconds: Long?,
+    @SerializedName("time_remaining") val timeRemaining: Long?,
+    @SerializedName("player_names") val playerNames: Any?,
+    @SerializedName("nombre_usuario") val nombreUsuario: String?,
+    @SerializedName("player_name") val playerName: String?,
+
+    ) {
+    // Helper para convertir distribucion_misiones a Map si es necesario
+    @Suppress("UNCHECKED_CAST")
+    fun getDistribucionMisiones(): Map<String, Any>? {
+        return when (distribucionMisiones) {
+            is Map<*, *> -> distribucionMisiones as? Map<String, Any>
+            else -> null
+        }
+    }
+    
+    // Helper para convertir scores a Map si es necesario
+    @Suppress("UNCHECKED_CAST")
+    fun getScores(): Map<String, Int>? {
+        return when (scores) {
+            is Map<*, *> -> {
+                try {
+                    scores as? Map<String, Int>
+                } catch (e: Exception) {
+                    null
+                }
+            }
+            else -> null
+        }
+    }
+}
 
 /** Notificación temporal del WebSocket. */
 data class WsNotification(

@@ -14,6 +14,7 @@ import com.google.android.material.snackbar.Snackbar
 import cat.hajoya.piratasdeandromeda.R
 import cat.hajoya.piratasdeandromeda.databinding.SettingsFrBinding
 import cat.hajoya.piratasdeandromeda.ui.auth.AuthActivity
+import cat.hajoya.piratasdeandromeda.ui.admin.AdminActivity
 import cat.hajoya.piratasdeandromeda.ui.main.MainActivity
 import cat.hajoya.piratasdeandromeda.viewmodels.SettingsViewModel
 import kotlinx.coroutines.launch
@@ -26,7 +27,12 @@ class SettingsFragment : Fragment() {
     private val binding get() = _binding!!
 
     private val viewModel: SettingsViewModel by activityViewModels {
-        (requireActivity() as MainActivity).settingsViewModelFactory
+        val activity = requireActivity()
+        when (activity) {
+            is MainActivity -> activity.settingsViewModelFactory
+            is cat.hajoya.piratasdeandromeda.ui.admin.AdminActivity -> activity.settingsViewModelFactory
+            else -> throw IllegalStateException("Activity must be MainActivity or AdminActivity")
+        }
     }
 
     override fun onCreateView(

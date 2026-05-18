@@ -1,6 +1,7 @@
 package cat.hajoya.piratasdeandromeda.ui.preparacio
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -24,8 +25,13 @@ import cat.hajoya.piratasdeandromeda.viewmodels.GameViewModel
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.delay
 
 class ConfigHabitacionsFragment : Fragment() {
+
+    companion object {
+        private const val TAG = "ConfigHabitacionsFragment"
+    }
 
     private var _binding: ConfigHabPartBinding? = null
     private val binding get() = _binding!!
@@ -74,11 +80,32 @@ class ConfigHabitacionsFragment : Fragment() {
                 binding.btnSiguiente.isEnabled = true
 
                 result
-                    .onSuccess { openPersonatgesScreen() }
+                    .onSuccess { gameCode ->
+                        Log.i(TAG, "✅ Partida creada exitosamente: $gameCode")
+                        // Esperar un poco para asegurar que WebSocket está conectado
+                        kotlinx.coroutines.delay(500)
+                        
+                        val wsCode = viewModel.wsCode.value
+                        if (wsCode != null) {
+                            Snackbar.make(
+                                binding.root,
+                                "🟢 Conexión WebSocket exitosa\n🎮 Partida: $gameCode",
+                                Snackbar.LENGTH_LONG
+                            ).show()
+                            openPersonatgesScreen()
+                        } else {
+                            Snackbar.make(
+                                binding.root,
+                                "⚠️ Partida creada pero WebSocket sin código",
+                                Snackbar.LENGTH_LONG
+                            ).show()
+                        }
+                    }
                     .onFailure { error ->
+                        Log.e(TAG, "❌ Error al crear partida: ${error.message}", error)
                         Snackbar.make(
                             binding.root,
-                            error.message ?: "No se pudo crear la partida",
+                            "❌ Error: ${error.message ?: "No se pudo crear la partida"}",
                             Snackbar.LENGTH_LONG,
                         ).show()
                     }

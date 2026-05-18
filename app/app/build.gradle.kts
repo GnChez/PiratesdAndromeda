@@ -41,7 +41,7 @@ android {
                 "proguard-rules.pro"
             )
             buildConfigField("String", "BASE_HTTP_URL", "\"https://api.piratasandromeda.me/\"")
-            buildConfigField("String", "BASE_WS_URL", "\"wss://api.piratasandromeda.me\"")
+            buildConfigField("String", "BASE_WS_URL", "\"wss://api.piratasandromeda.me/ws/join/\"")
         }
     }
     compileOptions {

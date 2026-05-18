@@ -6,6 +6,7 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import cat.hajoya.piratasdeandromeda.databinding.ItemUserTaskBinding
+import cat.hajoya.piratasdeandromeda.models.UserTaskUi
 
 class UserTaskAdapter(
     private val onStartTask: (UserTaskUi) -> Unit,

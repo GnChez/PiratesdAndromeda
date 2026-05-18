@@ -25,6 +25,9 @@ class SessionManager(private val context: Context) {
     /** Flujo de email actual. */
     val email: Flow<String?> = context.sessionDataStore.data.map { it[KEY_EMAIL] }
 
+    /** Flujo con rol del usuario (id_rol_sistema del servidor). */
+    val userRole: Flow<Int?> = context.sessionDataStore.data.map { it[KEY_USER_ROLE] }
+
     /** Flujo con código websocket del jugador. */
     val wsCode: Flow<String?> = context.sessionDataStore.data.map { it[KEY_WS_CODE] }
 
@@ -44,6 +47,11 @@ class SessionManager(private val context: Context) {
     /** Guarda email del usuario. */
     suspend fun saveEmail(value: String) {
         context.sessionDataStore.edit { prefs -> prefs[KEY_EMAIL] = value }
+    }
+
+    /** Guarda el rol del usuario (id_rol_sistema). */
+    suspend fun saveUserRole(roleId: Int) {
+        context.sessionDataStore.edit { prefs -> prefs[KEY_USER_ROLE] = roleId }
     }
 
     /** Guarda ws_code de sesión. */
@@ -81,6 +89,7 @@ class SessionManager(private val context: Context) {
         val KEY_USER_ID = intPreferencesKey("key_user_id")
         val KEY_NOMBRE_USUARIO = stringPreferencesKey("key_nombre_usuario")
         val KEY_EMAIL = stringPreferencesKey("key_email")
+        val KEY_USER_ROLE = intPreferencesKey("key_user_role")
         val KEY_WS_CODE = stringPreferencesKey("key_ws_code")
         val KEY_GAME_CODE = stringPreferencesKey("key_game_code")
         val KEY_DARK_MODE = booleanPreferencesKey("key_dark_mode")

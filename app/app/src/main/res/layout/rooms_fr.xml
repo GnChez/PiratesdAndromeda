@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:background="@drawable/backgroundbasic"
+    android:fillViewport="true"
+    android:padding="16dp">
+
+    <TextView
+        android:id="@+id/tvRoomsTitle"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="Espacios de juego:"
+        android:layout_marginHorizontal="10dp"
+        android:textAlignment="center"
+        android:textAppearance="@style/TextAppearance.Piratas.Title"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rvRooms"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginTop="20dp"
+        android:nestedScrollingEnabled="false"
+        app:layout_constraintBottom_toTopOf="@+id/btnClose"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tvRoomsTitle"
+        app:layout_constraintVertical_bias="0.0"
+        tools:listitem="@layout/item_room_select" />
+
+
+    <ImageButton
+        android:id="@+id/btnClose"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_marginBottom="8dp"
+        android:background="@drawable/btn_icon_circle"
+        android:contentDescription="Volver a la pantalla anterior"
+        android:padding="10dp"
+        android:scaleType="centerInside"
+        android:src="@drawable/ic_close"
+        app:tint="@color/blanco"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

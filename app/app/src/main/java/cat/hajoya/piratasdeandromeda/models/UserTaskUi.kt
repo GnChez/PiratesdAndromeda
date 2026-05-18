@@ -1,4 +1,4 @@
-package cat.hajoya.piratasdeandromeda.ui.joc
+package cat.hajoya.piratasdeandromeda.models
 
 data class UserTaskUi(
     val id: Long,
@@ -7,4 +7,3 @@ data class UserTaskUi(
     val completada: Boolean = false,
     val duracionEstimada: Int = 0, // en segundos
 )
-

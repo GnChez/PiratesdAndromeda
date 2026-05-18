@@ -27,23 +27,10 @@
             android:textColor="@color/on_surface_soft"
             android:textSize="20sp"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@id/tvPercent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             tools:text="Capitana Aurora" />
 
-        <TextView
-            android:id="@+id/tvPercent"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:fontFamily="@font/pirata"
-            android:textColor="@color/anaranjado_light"
-            android:textSize="18sp"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@id/btnInfo"
-            app:layout_constraintTop_toTopOf="parent"
-            tools:text="78%" />
 
         <Button
             android:id="@+id/btnInfo"

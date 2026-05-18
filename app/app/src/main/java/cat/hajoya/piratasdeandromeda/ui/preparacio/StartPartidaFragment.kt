@@ -1,6 +1,7 @@
 package cat.hajoya.piratasdeandromeda.ui.preparacio
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -24,8 +25,13 @@ import cat.hajoya.piratasdeandromeda.viewmodels.GameViewModel
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.delay
 
 class StartPartidaFragment : Fragment() {
+
+    companion object {
+        private const val TAG = "StartPartidaFragment"
+    }
 
     private var _binding: ConfigPartFrBinding? = null
     private val binding get() = _binding!!
@@ -116,21 +122,34 @@ class StartPartidaFragment : Fragment() {
             
             viewLifecycleOwner.lifecycleScope.launch {
                 try {
+                    Log.i(TAG, "Intentando unirse a partida: $codigoPartida")
                     val result = viewModel.joinGame(codigoPartida)
                     result
                         .onSuccess { wsCode ->
+                            Log.i(TAG, "✅ Unido exitosamente a partida: $codigoPartida")
+                            // Esperar un poco para asegurar que WebSocket está conectado
+                            kotlinx.coroutines.delay(500)
+                            
+                            Snackbar.make(
+                                binding.root,
+                                "🟢 Conexión WebSocket exitosa\n🎮 Partida: $codigoPartida",
+                                Snackbar.LENGTH_LONG
+                            ).show()
+                            
                             binding.edUnirseCode.text?.clear()
                             openPersonatgesScreen()
                         }
                         .onFailure { error ->
+                            Log.e(TAG, "❌ Error al unirse a partida: ${error.message}", error)
                             binding.btnUnirme.isEnabled = true
                             Snackbar.make(
                                 binding.root,
-                                error.message ?: "No se pudo unir a la partida",
+                                "❌ Error: ${error.message ?: "No se pudo unir a la partida"}",
                                 Snackbar.LENGTH_LONG
                             ).show()
                         }
                 } catch (e: Exception) {
+                    Log.e(TAG, "❌ Excepción al unirse: ${e.message}", e)
                     binding.btnUnirme.isEnabled = true
                     Snackbar.make(
                         binding.root,

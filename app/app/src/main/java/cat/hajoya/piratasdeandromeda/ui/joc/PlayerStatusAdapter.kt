@@ -30,7 +30,6 @@ class PlayerStatusAdapter(
 
         fun bind(item: PlayerStatusUi) {
             binding.tvPlayerName.text = item.username
-            binding.tvPercent.text = "${item.percent}%"
             binding.btnInfo.contentDescription = "Ver informacion de ${item.username}"
 
             binding.btnInfo.setOnClickListener {

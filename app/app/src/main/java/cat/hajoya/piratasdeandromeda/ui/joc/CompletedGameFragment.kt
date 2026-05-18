@@ -87,10 +87,7 @@ class CompletedGameFragment : Fragment() {
     }
 
     private fun updatePlayerScores(scores: Map<String, Int>) {
-        if (scores.isNotEmpty()) {
-            val userPoints = scores.values.firstOrNull() ?: 0
-            binding.tvPuntosJugador.text = userPoints.toString()
-        }
+        binding.tvPuntosJugador.text = gameViewModel.getMyPoints(scores).toString()
     }
 
     override fun onDestroyView() {

@@ -15,22 +15,23 @@ import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
 import cat.hajoya.piratasdeandromeda.R
 import cat.hajoya.piratasdeandromeda.databinding.ActivityMenuGameBinding
+import cat.hajoya.piratasdeandromeda.models.RolJoc
 import cat.hajoya.piratasdeandromeda.viewmodels.GameViewModel
 import kotlinx.coroutines.launch
 
 /**
  * Fragment que muestra el menú principal del juego.
- * Permite acceder a diferentes pantallas del juego:
- * - Camarotes
- * - Labores
- * - Reunirse
- * - Soltar armas (salir)
+ *
+ * - CAMAROTES → RoomFragment (lista de planetas/salas para elegir)
+ * - LABORES   → UserTasksFragment (tareas del jugador, sin sala preseleccionada)
+ * - REUNIRSE  → (TODO)
+ * - SOLTAR ARMAS → ExitGameDialogFragment (confirmación para abandonar)
  */
 class MenuJuegoFragment : Fragment() {
 
     private var _binding: ActivityMenuGameBinding? = null
     private val binding get() = _binding!!
-    
+
     private val gameViewModel: GameViewModel by activityViewModels()
 
     override fun onCreateView(
@@ -44,52 +45,44 @@ class MenuJuegoFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        
-        // Setup title con colores mixtos (accesibilidad)
+
         setupTitle()
-        
-        // Escuchar cambios en puntuaciones
+
         lifecycleScope.launch {
             gameViewModel.playerScores.collect { scores ->
                 updatePlayerScores(scores)
             }
         }
-        
-        // Setup button listeners
+
         setupButtonListeners()
     }
 
-    /**
-     * Configura el título con estilos mixtos (nombre del usuario en blanco bold, resto en color más claro)
-     */
     private fun setupTitle() {
-        val username = "Corsario"  // Aquí podrías obtener del usuario actual
-        val fullText = "$username, eres parte de esta tripulación!"
+        // Obtener el nombre del usuario actual del ViewModel
+        val username = gameViewModel.usuarioActual.value ?: "Corsario"
+        val jugador = gameViewModel.jugadorActual.value
+        val rol = if (jugador?.rol == RolJoc.IMPOSTOR) "impostor" else "tripulante"
         
+        val fullText = "$username, ¡eres $rol en esta nave!"
+
         val spannableString = SpannableString(fullText)
-        
-        // Aplicar estilo bold y color blanco al nombre del usuario
+
         spannableString.setSpan(
             StyleSpan(Typeface.BOLD),
-            0,
-            username.length,
+            0, username.length,
             Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
         )
         spannableString.setSpan(
             ForegroundColorSpan(ContextCompat.getColor(requireContext(), R.color.blanco)),
-            0,
-            username.length,
+            0, username.length,
             Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
         )
-        
-        // Color más claro para el resto del texto
         spannableString.setSpan(
             ForegroundColorSpan(ContextCompat.getColor(requireContext(), R.color.anaranjado)),
-            username.length,
-            fullText.length,
+            username.length, fullText.length,
             Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
         )
-        
+
         binding.tvHeroTitle.text = spannableString
         binding.tvHeroTitle.isFocusable = false
         binding.tvHeroTitle.isClickable = false
@@ -102,14 +95,17 @@ class MenuJuegoFragment : Fragment() {
         }
     }
 
-    /**
-     * Configura los listeners de los botones
-     */
     private fun setupButtonListeners() {
+        // CAMAROTES → lista de salas para elegir antes de ver tareas
         binding.btnCamarotes.setOnClickListener {
-            // TODO: Navegar a camarotes
+            val roomFragment = RoomFragment.newInstance()
+            parentFragmentManager.beginTransaction()
+                .replace(R.id.fragment_container, roomFragment)
+                .addToBackStack(null)
+                .commit()
         }
-        
+
+        // LABORES → tareas directamente (sin selección de sala)
         binding.btnLabores.setOnClickListener {
             val userTasksFragment = UserTasksFragment.newInstance()
             parentFragmentManager.beginTransaction()
@@ -117,14 +113,15 @@ class MenuJuegoFragment : Fragment() {
                 .addToBackStack(null)
                 .commit()
         }
-        
+
         binding.btnReunirse.setOnClickListener {
             // TODO: Navegar a reunirse
         }
-        
+
+        // SOLTAR ARMAS → dialog de confirmación de salida
         binding.btnSoltarArmas.setOnClickListener {
-            // Soltar armas = volver atrás / salir del juego
-            parentFragmentManager.popBackStack()
+            ExitGameDialogFragment.newInstance()
+                .show(parentFragmentManager, ExitGameDialogFragment.TAG)
         }
     }
 
@@ -133,4 +130,3 @@ class MenuJuegoFragment : Fragment() {
         _binding = null
     }
 }
-

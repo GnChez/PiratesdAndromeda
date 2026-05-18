@@ -29,7 +29,7 @@ class RoomAdapter(
     ) : RecyclerView.ViewHolder(binding.root) {
 
         fun bind(item: RoomItem) {
-            binding.tvShipName.text = item.name
+            binding.tvRoomName.text = item.name
             binding.btnDeleteRoom.setOnClickListener {
                 val position = bindingAdapterPosition
                 if (position != RecyclerView.NO_POSITION) {

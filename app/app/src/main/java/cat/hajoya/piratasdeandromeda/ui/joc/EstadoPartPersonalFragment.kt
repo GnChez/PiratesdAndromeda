@@ -12,11 +12,14 @@ import androidx.appcompat.app.AlertDialog
 import androidx.core.graphics.drawable.toDrawable
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import cat.hajoya.piratasdeandromeda.R
 import cat.hajoya.piratasdeandromeda.databinding.EstadoPartPersonalBinding
 import cat.hajoya.piratasdeandromeda.ui.main.MainActivity
 import cat.hajoya.piratasdeandromeda.viewmodels.GameViewModel
+import kotlinx.coroutines.launch
 
 class EstadoPartPersonalFragment : Fragment() {
 
@@ -25,7 +28,18 @@ class EstadoPartPersonalFragment : Fragment() {
 
     private val adapter = PlayerStatusAdapter(::showPlayerInfoDialog)
     private val viewModel: GameViewModel by activityViewModels {
-        (requireActivity() as MainActivity).gameViewModelFactory
+        val activity = requireActivity()
+        // Soportar MainActivity y AdminActivity
+        (activity as? MainActivity)?.gameViewModelFactory 
+            ?: (activity as? cat.hajoya.piratasdeandromeda.ui.admin.AdminActivity)?.gameViewModelFactory
+            ?: throw IllegalStateException("Activity debe ser MainActivity o AdminActivity")
+    }
+
+    private var gameCode: String? = null
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        gameCode = arguments?.getString(ARG_GAME_CODE)
     }
 
     override fun onCreateView(
@@ -40,6 +54,11 @@ class EstadoPartPersonalFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        // Conectar al monitor si tenemos código
+        gameCode?.let { code ->
+            viewModel.connectMonitor(code)
+        }
+
         setupRecyclerView()
         observeViewModel()
         setupStaticUi()
@@ -53,19 +72,26 @@ class EstadoPartPersonalFragment : Fragment() {
     private fun setupRecyclerView() {
         binding.rvPlayersProgress.layoutManager = LinearLayoutManager(requireContext())
         binding.rvPlayersProgress.adapter = adapter
-        adapter.submitList(
-            listOf(
-                PlayerStatusUi(1L, "Capitana Aurora", "aurora@piratas.cat", 82),
-                PlayerStatusUi(2L, "Barbanegra", "barbanegra@piratas.cat", 57),
-                PlayerStatusUi(3L, "Loba del Mar", "loba@piratas.cat", 39),
-                PlayerStatusUi(4L, "Corsario K", "corsario@piratas.cat", 91),
-            ),
-        )
     }
 
     private fun observeViewModel() {
+        // Observar jugadores conectados desde el monitor usando StateFlow
+        lifecycleScope.launch {
+            viewModel.connectedPlayers.collect { players ->
+                val playerStatusList = players.map { player ->
+                    PlayerStatusUi(
+                        id = player.playerId.toLongOrNull() ?: 0L,
+                        username = player.nombreUsuario,
+                        email = player.playerName,
+                        percent = (player.puntos / 100).coerceIn(0, 100)
+                    )
+                }
+                adapter.submitList(playerStatusList)
+            }
+        }
+
         viewModel.partidaActual.observe(viewLifecycleOwner) { partida ->
-            val code = partida?.codiPartida ?: "-"
+            val code = partida?.codiPartida ?: gameCode ?: "-"
             binding.tvGameCode.text = getString(R.string.game_code_value_format, code)
         }
     }
@@ -73,7 +99,9 @@ class EstadoPartPersonalFragment : Fragment() {
     private fun setupStaticUi() {
         binding.tvTimeRemaining.text = "Tiempo restante: 09:42"
 
-        binding.btnClose.setOnClickListener { parentFragmentManager.popBackStack() }
+        binding.btnClose.setOnClickListener { 
+            parentFragmentManager.popBackStack() 
+        }
         binding.btnMenu.setOnClickListener { }
     }
 
@@ -94,10 +122,24 @@ class EstadoPartPersonalFragment : Fragment() {
             .create()
 
         dialog.window?.setBackgroundDrawable(Color.TRANSPARENT.toDrawable())
+        // Cerrar al clickear fuera
+        dialog.setCanceledOnTouchOutside(true)
 
         btnCloseDialog.setOnClickListener { dialog.dismiss() }
 
         dialog.show()
+    }
+
+    companion object {
+        private const val ARG_GAME_CODE = "game_code"
+
+        fun newInstance(gameCode: String): EstadoPartPersonalFragment {
+            return EstadoPartPersonalFragment().apply {
+                arguments = Bundle().apply {
+                    putString(ARG_GAME_CODE, gameCode)
+                }
+            }
+        }
     }
 }
 

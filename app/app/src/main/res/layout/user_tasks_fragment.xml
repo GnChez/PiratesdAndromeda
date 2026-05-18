@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.core.widget.NestedScrollView
+<androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
@@ -9,8 +9,11 @@
     android:fillViewport="true">
 
     <androidx.constraintlayout.widget.ConstraintLayout
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         android:padding="16dp">
 
         <!-- ── TÍTULO ── -->
@@ -32,8 +35,8 @@
 
         <TextView
             android:id="@+id/tvPuntosJugador"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
             android:layout_marginTop="8dp"
             android:layout_marginEnd="16dp"
             android:background="@drawable/btn_icon_circle"
@@ -138,7 +141,7 @@
 
         </com.google.android.material.card.MaterialCardView>
 
-        <!-- ── BOTÓN CERRAR ── -->
+        <!-- ── BOTÓN CERRAR (izquierda) ── -->
 
         <ImageButton
             android:id="@+id/btnClose"
@@ -154,7 +157,25 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent" />
 
+        <!--
+            ── BOTÓN SABOTEAR (solo visible para el IMPOSTOR) ──
+            Oculto por defecto. El Fragment lo hace visible si jugadorActual.rol == IMPOSTOR.
+        -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnSabotear"
+            style="@style/Widget.PiratasDeAndromeda.DarkButton"
+            android:layout_width="wrap_content"
+            android:layout_height="48dp"
+            android:layout_marginBottom="16dp"
+            android:background="@android:color/transparent"
+            android:backgroundTint="@android:color/transparent"
+            android:text="☠ Sabotear"
+            android:textSize="14sp"
+            android:visibility="gone"
+            tools:visibility="visible"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+
     </androidx.constraintlayout.widget.ConstraintLayout>
 
-</androidx.core.widget.NestedScrollView>
-
+</androidx.constraintlayout.widget.ConstraintLayout>

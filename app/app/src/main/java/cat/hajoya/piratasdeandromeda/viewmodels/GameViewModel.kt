@@ -4,6 +4,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import android.util.Log
 import cat.hajoya.piratasdeandromeda.RoomItem
 import cat.hajoya.piratasdeandromeda.SavedShip
 import cat.hajoya.piratasdeandromeda.data.local.SessionManager
@@ -23,6 +24,8 @@ import cat.hajoya.piratasdeandromeda.models.Missio
 import cat.hajoya.piratasdeandromeda.models.Partida
 import cat.hajoya.piratasdeandromeda.models.Personaje
 import cat.hajoya.piratasdeandromeda.models.RolJoc
+import cat.hajoya.piratasdeandromeda.models.TipusHabitacio
+import cat.hajoya.piratasdeandromeda.models.UserTaskUi
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -30,9 +33,9 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
@@ -45,8 +48,36 @@ class GameViewModel(
     private val webSocketManager: WebSocketManager? = null,
 ) : ViewModel() {
 
+    companion object {
+        private const val TAG = "GameViewModel"
+    }
+
+    // Inicializar el nombre de usuario desde la sesión
+    init {
+        viewModelScope.launch {
+            sessionManager.nombreUsuario.collect { username ->
+                _usuarioActual.postValue(username)
+            }
+        }
+    }
+
     private val _selectedShipId = kotlinx.coroutines.flow.MutableStateFlow<Long?>(null)
+    private val _myMissions = MutableStateFlow<List<UserTaskUi>>(emptyList())
+    private val _myUserId = MutableStateFlow<Int?>(null)
+
+    private val _usuarioActual = MutableLiveData<String?>()
+    val usuarioActual: LiveData<String?> = _usuarioActual
+
     val selectedShipId: StateFlow<Long?> = _selectedShipId
+    val myMissions: StateFlow<List<UserTaskUi>> = _myMissions.asStateFlow()
+
+    /** ID del usuario que crea la partida */
+    private val _idCreador = MutableStateFlow<Int?>(null)
+    val idCreador: StateFlow<Int?> = _idCreador
+
+    /** Conectados desde el monitor WebSocket */
+    private val _connectedPlayers = MutableStateFlow<List<cat.hajoya.piratasdeandromeda.data.network.ConnectedPlayer>>(emptyList())
+    val connectedPlayers: StateFlow<List<cat.hajoya.piratasdeandromeda.data.network.ConnectedPlayer>> = _connectedPlayers
 
     /** Evento que se emite cuando se crea una nave exitosamente */
     private val _shipCreatedEvent = MutableSharedFlow<Long>(replay = 0)
@@ -103,8 +134,8 @@ class GameViewModel(
     private val _wsCode = MutableStateFlow<String?>(null)
     val wsCode: StateFlow<String?> = _wsCode
 
-    private val _missionsByRoom = MutableStateFlow<Map<String, List<Int>>>(emptyMap())
-    val missionsByRoom: StateFlow<Map<String, List<Int>>> = _missionsByRoom
+    private val _missionsByRoom = MutableStateFlow<Map<String, Any>>(emptyMap())
+    val missionsByRoom: StateFlow<Map<String, Any>> = _missionsByRoom
 
     private val _playerScores = MutableStateFlow<Map<String, Int>>(emptyMap())
     val playerScores: StateFlow<Map<String, Int>> = _playerScores
@@ -114,62 +145,10 @@ class GameViewModel(
 
     private val _currentMissionStartTime = MutableStateFlow<Long?>(null)
     val currentMissionStartTime: StateFlow<Long?> = _currentMissionStartTime
-
+    private val _sabotageEvent = MutableSharedFlow<Int>(replay = 0)
+    val sabotageEvent = _sabotageEvent.asSharedFlow()
     fun selectShip(shipId: Long?) {
         _selectedShipId.value = shipId
-    }
-
-    fun crearPartidaLite(config: ConfigPartida) {
-        val partida = Partida(
-            id = 1,
-            codiPartida = "12345",
-            nomPartida = config.nomPartida,
-            presencial = false,
-            estatPartida = EstatPartida.ESPERANT_JUGADORS,
-            numJugadors = 1,
-            numImpostors = config.numImpostors,
-            tempsLimitMinuts = config.tempsLimitMinuts,
-            percentatgeReparacio = 0f,
-            dificultad = config.dificultad,
-        )
-        _partidaActual.value = partida
-        _percentatgeReparacio.value = 0f
-        viewModelScope.launch(Dispatchers.IO) {
-            sessionManager.saveGameCode(partida.codiPartida)
-        }
-    }
-
-    fun unirsePartida(codi: String) {
-        val partida = Partida(
-            id = 1,
-            codiPartida = codi,
-            nomPartida = "Partida del codigo $codi",
-            presencial = false,
-            estatPartida = EstatPartida.ESPERANT_JUGADORS,
-            numJugadors = 4,
-            numImpostors = 1,
-            tempsLimitMinuts = 10,
-            percentatgeReparacio = 0f,
-            dificultad = Dificultad.MITJA,
-        )
-        _partidaActual.value = partida
-        viewModelScope.launch(Dispatchers.IO) {
-            sessionManager.saveGameCode(codi)
-        }
-    }
-
-    fun triarPersonatge(personatge: Personaje) {
-        val jugador = JugadorPartida(
-            id = 1,
-            userId = 1,
-            apodoPartida = "PirataValient",
-            rol = RolJoc.TRIPULANT,
-            viu = true,
-            missionsCompletades = 0,
-            punts = 0,
-            personatge = personatge,
-        )
-        _jugadorActual.value = jugador
     }
 
     fun iniciarPartida() {
@@ -181,8 +160,43 @@ class GameViewModel(
         // Mock
     }
 
-    fun sabotejar() {
-        // Mock
+    fun sabotearHabitacio(habitacioId: Int) {
+        viewModelScope.launch {
+            // Emitir el ID de la sala saboteada para que los fragments suscritos
+            // muestren SabotageAlertDialogFragment
+            _sabotageEvent.emit(habitacioId)
+
+            // Emitir via WebSocket la notificación de sabotaje al servidor/otros jugadores
+            val notification = "sabotage:${habitacioId}"
+            _wsNotifications.emit(notification)
+
+            // TODO: llamar al endpoint REST de sabotaje cuando esté disponible
+            // gameRepository.sabotearHabitacion(habitacioId)
+        }
+    }
+
+    fun leaveGame() {
+        // Desconectar WebSockets
+        webSocketManager?.disconnect()
+
+        // Resetear estado de la partida
+        _partidaActual.postValue(null)
+        _jugadorActual.postValue(null)
+        _estatPartida.postValue(EstatPartida.ESPERANT_JUGADORS)
+        _connectedPlayers.value = emptyList()
+        _myMissions.value = emptyList()
+        _missionsAssignades.postValue(emptyList())
+        _jugadorsVius.postValue(emptyList())
+        _habitacionsPartida.postValue(emptyList())
+
+        // Limpiar códigos y sesión de partida
+        _wsGameCode.value = null
+        _wsCode.value = null
+        _idCreador.value = null
+        _myUserId.value = null
+        _missionsByRoom.value = emptyMap()
+        _playerScores.value = emptyMap()
+        _currentMissionStartTime.value = null
     }
 
     fun convocarReunio() {
@@ -217,7 +231,7 @@ class GameViewModel(
             habitaciones = selectedRooms.map { HabitacionBase(nombre = it.name) },
         )
 
-        return gameRepository.createGame(request).map { response ->
+        return gameRepository.createGame(request).mapCatching { response ->
             val partida = Partida(
                 id = response.idPartida,
                 codiPartida = response.codigoPartida,
@@ -232,14 +246,25 @@ class GameViewModel(
             )
             _partidaActual.postValue(partida)
             
-            // Guardar códigos y conectar WebSocket
+            // Guardar códigos y ID del creador
             _wsGameCode.value = response.codigoPartida
             _wsCode.value = response.wsCode
             _missionsByRoom.value = response.habitacionesMisiones
+            _idCreador.value = userId
+            _myUserId.value = userId
             
-            // Conectar WebSocket
-            webSocketManager?.connect(response.codigoPartida, response.wsCode)
+            // Convertir habitaciones_misiones a Habitacio
+            val habitaciones = response.habitacionesMisiones.keys.mapIndexed { index, nombre ->
+                Habitacio(id = index + 1, nom = nombre, tipus = TipusHabitacio.OTRA)
+            }
+            _habitacionsPartida.postValue(habitaciones)
+            
+            // Conectar WebSocket de jugador
+            connectWebSocket(response.codigoPartida, response.wsCode)
             setupWebSocketListeners()
+            
+            // Conectar Monitor WebSocket para obtener lista de jugadores
+            connectMonitor(response.codigoPartida)
             
             response.codigoPartida
         }
@@ -290,7 +315,7 @@ class GameViewModel(
             idJugador = userId
         )
 
-        return gameRepository.joinGame(request).map { response ->
+        return gameRepository.joinGame(request).mapCatching { response ->
             val partida = Partida(
                 id = 1,
                 codiPartida = codigoPartida,
@@ -305,24 +330,99 @@ class GameViewModel(
             )
             _partidaActual.postValue(partida)
             
-            // Guardar códigos y conectar WebSocket
+            // Guardar códigos
             _wsGameCode.value = codigoPartida
             _wsCode.value = response.wsCode
-            
-            // Conectar WebSocket
-            webSocketManager?.connect(codigoPartida, response.wsCode)
+            _myUserId.value = userId
+
+            // Conectar WebSocket de jugador
+            connectWebSocket(codigoPartida, response.wsCode)
             setupWebSocketListeners()
             
+            // Conectar Monitor WebSocket para obtener lista de jugadores
+            connectMonitor(codigoPartida)
+            
             response.wsCode
+        }
+    }
+    
+    /**
+     * Conecta el WebSocket y registra el resultado
+     */
+    private fun connectWebSocket(gameCode: String, wsCode: String) {
+        try {
+            if (webSocketManager == null) {
+                Log.e(TAG, "WebSocketManager es null, no se puede conectar")
+                return
+            }
+            
+            Log.i(TAG, "Intentando conectar WebSocket - Código: $gameCode, WsCode: $wsCode")
+            webSocketManager.connect(gameCode, wsCode)
+            Log.i(TAG, "✅ WebSocket conectado exitosamente para partida: $gameCode")
+        } catch (e: Exception) {
+            Log.e(TAG, "❌ Error al conectar WebSocket: ${e.message}", e)
+        }
+    }
+
+    /**
+     * Conecta el WebSocket del monitor para obtener la lista de jugadores
+     */
+    fun connectMonitor(gameCode: String) {
+        try {
+            if (webSocketManager == null) {
+                Log.e(TAG, "WebSocketManager es null, no se puede conectar monitor")
+                return
+            }
+            
+            Log.i(TAG, "Conectando Monitor WebSocket para partida: $gameCode")
+            webSocketManager.connectMonitor(gameCode)
+        } catch (e: Exception) {
+            Log.e(TAG, "❌ Error al conectar Monitor: ${e.message}", e)
         }
     }
 
     private fun setupWebSocketListeners() {
         webSocketManager?.let { manager ->
             viewModelScope.launch {
-                // Escuchar notificaciones temporales
+                // Escuchar notificaciones del WS de jugador
                 manager.notifications.collect { notification: WsNotification ->
                     _wsNotifications.emit(notification.message)
+                }
+            }
+
+            // Escuchar cambios en jugadores conectados (desde Monitor)
+            viewModelScope.launch {
+                manager.connectedPlayers.collect { players ->
+                    _connectedPlayers.value = players
+                    Log.i(TAG, "Jugadores conectados: ${players.size}")
+                }
+            }
+
+            viewModelScope.launch {
+                manager.messages.collect { message ->
+                    if (message?.type == "GAME_STARTED") {
+                        val userId = sessionManager.userId.first() ?: return@collect
+                        val distrib = message.getDistribucionMisiones() ?: return@collect
+                        val rawIds = (distrib[userId.toString()] as? List<*>) ?: return@collect
+                        val missionIds = rawIds.mapNotNull {
+                            when (it) {
+                                is Double -> it.toInt(); is Int -> it; else -> null
+                            }
+                        }
+                        val rooms = _missionsByRoom.value
+                        _myMissions.value = missionIds.map { id ->
+                            val roomName = rooms.entries
+                                .firstOrNull { (_, v) -> (v as? List<*>)?.any { m -> (m as? Double)?.toInt() == id || m == id } == true }
+                                ?.key ?: "Misión $id"
+                            UserTaskUi(id = id.toLong(), nombre = "Misión en $roomName")
+                        }
+                    } else if (message?.type == "COMPLETE_MISSION") {
+                        // Marcar misión como completada
+                        val missionId = message.missionId?.toLong() ?: return@collect
+                        _myMissions.value = _myMissions.value.map { mission ->
+                            if (mission.id == missionId) mission.copy(completada = true) else mission
+                        }
+                    }
                 }
             }
         }
@@ -333,9 +433,32 @@ class GameViewModel(
         webSocketManager?.sendMissionStarted(missionId)
     }
 
+    fun getMyPoints(scores: Map<String, Int>): Int {
+        val id = _myUserId.value?.toString() ?: return 0
+        return scores[id] ?: 0
+    }
+
     fun sendMissionCompleted(missionId: Int) {
         _currentMissionStartTime.value = null
         webSocketManager?.sendMissionCompleted(missionId)
+    }
+
+    /**
+     * Envía el evento de inicio de partida por WebSocket
+     */
+    fun iniciarPartidaPorWebSocket() {
+        webSocketManager?.send(WebSocketManager.INICIO_PARTIDA)
+    }
+
+    /**
+     * Envía el evento de fin de partida por WebSocket
+     */
+    fun finalizarPartidaPorWebSocket(ganadorTripulacion: Boolean? = null) {
+        val extraFields = mutableMapOf<String, Any?>()
+        if (ganadorTripulacion != null) {
+            extraFields["ganador_tripulacion"] = ganadorTripulacion
+        }
+        webSocketManager?.send(WebSocketManager.FIN_PARTIDA, extraFields)
     }
 
     override fun onCleared() {
@@ -343,4 +466,10 @@ class GameViewModel(
         webSocketManager?.disconnect()
     }
 }
+
+
+
+
+
+
 
