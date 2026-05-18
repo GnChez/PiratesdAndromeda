@@ -40,45 +40,21 @@ class AuthActivity : AppCompatActivity() {
         // Mantener el SplashScreen visible mientras carga la sesión
         splashScreen.setKeepOnScreenCondition { isLoading }
 
-        // LIMPIEZA: Borrar sesión guardada de testing anterior (SOLO UNA VEZ)
-        val prefs = getSharedPreferences("app_init", MODE_PRIVATE)
-        if (!prefs.getBoolean("session_cleaned", false)) {
-            lifecycleScope.launch {
-                sessionManager.clearSession()
-                prefs.edit().putBoolean("session_cleaned", true).apply()
-            }
+        // LIMPIEZA: Borrar SIEMPRE la sesión al iniciar la app
+        lifecycleScope.launch {
+            sessionManager.clearSession()
         }
 
         // Mostrar Splash Screen durante mínimo 800ms
         lifecycleScope.launch {
             kotlinx.coroutines.delay(800)
             
-            // Checkear si hay sesión activa después del delay
-            sessionManager.userId.collect { userId ->
-                if (userId != null && savedInstanceState == null) {
-                    // Hay usuario en sesión VÁLIDA, obtener rol y navegar
-                    sessionManager.userRole.collect { roleId ->
-                        if (roleId != null) {
-                            val role = when (roleId) {
-                                1 -> RolUsuari.JUGADOR
-                                2 -> RolUsuari.TREBALLADOR
-                                3 -> RolUsuari.ADMIN
-                                else -> RolUsuari.JUGADOR
-                            }
-                            isLoading = false
-                            navigateByRole(role)
-                            return@collect
-                        }
-                    }
-                } else {
-                    // SIN sesión = mostrar LoginFragment
-                    isLoading = false
-                    if (savedInstanceState == null) {
-                        supportFragmentManager.commit {
-                            setReorderingAllowed(true)
-                            replace(R.id.fragment_container, LoginFragment())
-                        }
-                    }
+            // SIEMPRE mostrar LoginFragment al iniciar
+            isLoading = false
+            if (savedInstanceState == null) {
+                supportFragmentManager.commit {
+                    setReorderingAllowed(true)
+                    replace(R.id.fragment_container, LoginFragment())
                 }
             }
         }

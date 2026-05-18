@@ -45,7 +45,7 @@ class AuthViewModel(
 
                 val request = UserCreate(
                     nombreUsuario = if (isEmail) "" else userInput,
-                    email = if (isEmail) userInput else "",
+                    email = if (isEmail) userInput else "prueba@prueba.pr",
                     password = password
                 )
 

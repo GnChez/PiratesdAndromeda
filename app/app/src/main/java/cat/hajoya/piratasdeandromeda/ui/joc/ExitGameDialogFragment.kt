@@ -10,11 +10,7 @@ import cat.hajoya.piratasdeandromeda.R
 import cat.hajoya.piratasdeandromeda.databinding.ExitGameFrBinding
 import cat.hajoya.piratasdeandromeda.viewmodels.GameViewModel
 
-/**
- * Dialog de confirmación para abandonar la partida.
- * - "Seguir luchando" → dismiss
- * - "Abandonar" → leaveGame + navegar a MenuJuegoFragment
- */
+
 class ExitGameDialogFragment : DialogFragment() {
 
     private var _binding: ExitGameFrBinding? = null
@@ -46,8 +42,11 @@ class ExitGameDialogFragment : DialogFragment() {
     private fun confirmExit() {
         gameViewModel.leaveGame()
 
-        // Volver al menú
-        parentFragmentManager.popBackStack()
+        parentFragmentManager.popBackStack(null, androidx.fragment.app.FragmentManager.POP_BACK_STACK_INCLUSIVE)
+
+        parentFragmentManager.beginTransaction()
+            .replace(R.id.fragment_container, ConfigPartFragment())
+            .commit()
 
         dismiss()
     }
@@ -62,3 +61,6 @@ class ExitGameDialogFragment : DialogFragment() {
         fun newInstance() = ExitGameDialogFragment()
     }
 }
+
+
+
