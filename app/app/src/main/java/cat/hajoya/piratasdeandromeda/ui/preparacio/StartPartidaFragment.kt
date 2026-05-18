@@ -104,7 +104,7 @@ class StartPartidaFragment : Fragment() {
                 } catch (e: Exception) {
                     // Manejar error
                     binding.btnCrear.isEnabled = true
-                    Snackbar.make(binding.root, "Error al crear nave: ${e.message}", Snackbar.LENGTH_SHORT).show()
+                    Snackbar.make(binding.root, getString(R.string.game_error_ship_creation, e.message.orEmpty()), Snackbar.LENGTH_SHORT).show()
                 }
             }
         }
@@ -132,7 +132,7 @@ class StartPartidaFragment : Fragment() {
                             
                             Snackbar.make(
                                 binding.root,
-                                "🟢 Conexión WebSocket exitosa\n🎮 Partida: $codigoPartida",
+                                getString(R.string.game_ws_connection_success, codigoPartida),
                                 Snackbar.LENGTH_LONG
                             ).show()
                             
@@ -144,7 +144,7 @@ class StartPartidaFragment : Fragment() {
                             binding.btnUnirme.isEnabled = true
                             Snackbar.make(
                                 binding.root,
-                                "❌ Error: ${error.message ?: "No se pudo unir a la partida"}",
+                                getString(R.string.game_error_join_game, error.message ?: getString(R.string.game_join_error_default)),
                                 Snackbar.LENGTH_LONG
                             ).show()
                         }
@@ -167,7 +167,7 @@ class StartPartidaFragment : Fragment() {
                 launch {
                     viewModel.savedShips.collectLatest { ships ->
                         adapter.submitList(ships)
-                        binding.root.findViewById<View>(R.id.tvEmptyShips).isVisible = ships.isEmpty()
+                        binding.tvEmptyShips.isVisible = ships.isEmpty()
                     }
                 }
                 launch {

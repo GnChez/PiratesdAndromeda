@@ -71,7 +71,8 @@
             android:paddingStart="16dp"
             android:paddingEnd="16dp"
             android:textColor="@color/anaranjado"
-            android:textSize="16sp" />
+            android:textSize="16sp"
+            android:contentDescription="@string/correo" />
 
 
         <EditText
@@ -87,8 +88,8 @@
             android:paddingStart="16dp"
             android:paddingEnd="16dp"
             android:textColor="@color/anaranjado"
-            android:textSize="16sp" />
-
+            android:textSize="16sp"
+            android:contentDescription="@string/usuari" />
         <EditText
             android:id="@+id/etContrasenya"
             android:layout_width="match_parent"
@@ -102,7 +103,8 @@
             android:paddingStart="16dp"
             android:paddingEnd="16dp"
             android:textColor="@color/anaranjado"
-            android:textSize="16sp" />
+            android:textSize="16sp"
+            android:contentDescription="@string/contrasenya" />
 
         <EditText
             android:id="@+id/etContrasenyaRep"
@@ -117,7 +119,8 @@
             android:paddingStart="16dp"
             android:paddingEnd="16dp"
             android:textColor="@color/anaranjado"
-            android:textSize="16sp" />
+            android:textSize="16sp"
+            android:contentDescription="@string/rep_contrasenya" />
 
 
 
@@ -131,6 +134,7 @@
         style="@style/Widget.PiratasDeAndromeda.SecondaryButton"
         app:layout_constraintTop_toBottomOf="@+id/llLoginContainer"
         android:text="@string/btn_registrate"
+        android:contentDescription="@string/btn_registrate"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         android:textSize="25sp"

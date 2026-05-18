@@ -21,19 +21,18 @@ class PlayerStatusAdapter(
     }
 
     override fun onBindViewHolder(holder: PlayerStatusViewHolder, position: Int) {
-        holder.bind(getItem(position))
+        holder.bind(getItem(position), position)
     }
 
     inner class PlayerStatusViewHolder(
         private val binding: ItemPlayerStatusBinding,
     ) : RecyclerView.ViewHolder(binding.root) {
 
-        fun bind(item: PlayerStatusUi) {
+        fun bind(item: PlayerStatusUi, position: Int) {
             binding.tvPlayerName.text = item.username
             binding.btnInfo.contentDescription = "Ver informacion de ${item.username}"
 
             binding.btnInfo.setOnClickListener {
-                val position = bindingAdapterPosition
                 if (position != RecyclerView.NO_POSITION) {
                     onInfoClick(getItem(position))
                 }

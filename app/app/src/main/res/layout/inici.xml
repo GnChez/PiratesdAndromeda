@@ -74,7 +74,8 @@
             android:paddingStart="16dp"
             android:paddingEnd="16dp"
             android:textColor="@color/anaranjado"
-            android:textSize="16sp" />
+            android:textSize="16sp"
+            android:contentDescription="@string/hint_usuari" />
 
 
         <EditText
@@ -90,7 +91,8 @@
             android:paddingStart="16dp"
             android:paddingEnd="16dp"
             android:textColor="@color/anaranjado"
-            android:textSize="16sp" />
+            android:textSize="16sp"
+            android:contentDescription="@string/hint_contrasenya" />
 
         <Button
             android:id="@+id/btnEntra"
@@ -100,7 +102,8 @@
             style="@style/Widget.PiratasDeAndromeda.PrimaryButton"
             android:layout_gravity="center"
             android:text="@string/btn_entra"
-            android:textSize="25sp"/>
+            android:textSize="25sp"
+            android:contentDescription="@string/btn_entra" />
 
 
     </LinearLayout>

@@ -77,7 +77,7 @@ class InicioAdminFragment : Fragment() {
         binding.btnUnirse.setOnClickListener {
             val gameCode = binding.edPartidaCode.text?.toString()?.trim() ?: ""
             if (gameCode.isEmpty()) {
-                Snackbar.make(binding.root, "Ingresa un código de partida", Snackbar.LENGTH_SHORT).show()
+                Snackbar.make(binding.root, getString(R.string.game_enter_game_code), Snackbar.LENGTH_SHORT).show()
             } else {
                 buscarPartida(gameCode)
             }

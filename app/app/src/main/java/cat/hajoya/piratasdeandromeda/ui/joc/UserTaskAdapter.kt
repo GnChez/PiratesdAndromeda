@@ -23,27 +23,25 @@ class UserTaskAdapter(
     }
 
     override fun onBindViewHolder(holder: UserTaskViewHolder, position: Int) {
-        holder.bind(getItem(position))
+        holder.bind(getItem(position), position)
     }
 
     inner class UserTaskViewHolder(
         private val binding: ItemUserTaskBinding,
     ) : RecyclerView.ViewHolder(binding.root) {
 
-        fun bind(item: UserTaskUi) {
+        fun bind(item: UserTaskUi, position: Int) {
             binding.tvTareaNombre.text = item.nombre
             binding.cbTareaCompletada.isChecked = item.completada
             binding.cbTareaCompletada.contentDescription = "Marcar ${item.nombre} como completada"
 
             binding.cbTareaCompletada.setOnCheckedChangeListener { _, isChecked ->
-                val position = bindingAdapterPosition
                 if (position != RecyclerView.NO_POSITION) {
                     onTaskStatusChanged(getItem(position), isChecked)
                 }
             }
 
             binding.btnComenzarTarea.setOnClickListener {
-                val position = bindingAdapterPosition
                 if (position != RecyclerView.NO_POSITION) {
                     onStartTask(getItem(position))
                 }

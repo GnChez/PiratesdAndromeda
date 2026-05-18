@@ -89,14 +89,14 @@ class ConfigHabitacionsFragment : Fragment() {
                         if (wsCode != null) {
                             Snackbar.make(
                                 binding.root,
-                                "🟢 Conexión WebSocket exitosa\n🎮 Partida: $gameCode",
+                                getString(R.string.game_ws_connection_success, gameCode),
                                 Snackbar.LENGTH_LONG
                             ).show()
                             openPersonatgesScreen()
                         } else {
                             Snackbar.make(
                                 binding.root,
-                                "⚠️ Partida creada pero WebSocket sin código",
+                                getString(R.string.game_ws_connection_warning),
                                 Snackbar.LENGTH_LONG
                             ).show()
                         }
@@ -105,7 +105,7 @@ class ConfigHabitacionsFragment : Fragment() {
                         Log.e(TAG, "❌ Error al crear partida: ${error.message}", error)
                         Snackbar.make(
                             binding.root,
-                            "❌ Error: ${error.message ?: "No se pudo crear la partida"}",
+                            getString(R.string.game_error_game_creation, error.message ?: "Desconocido"),
                             Snackbar.LENGTH_LONG,
                         ).show()
                     }
@@ -134,7 +134,7 @@ class ConfigHabitacionsFragment : Fragment() {
                 } catch (e: Exception) {
                     // Manejar error
                     binding.btnAddRoom.isEnabled = true
-                    Snackbar.make(binding.root, "Error al crear habitación: ${e.message}", Snackbar.LENGTH_SHORT).show()
+                    Snackbar.make(binding.root, getString(R.string.game_error_room_creation, e.message.orEmpty()), Snackbar.LENGTH_SHORT).show()
                 }
             }
         }
@@ -146,7 +146,7 @@ class ConfigHabitacionsFragment : Fragment() {
                 launch {
                     viewModel.rooms.collectLatest { rooms ->
                         adapter.submitList(rooms)
-                        binding.root.findViewById<View>(R.id.tvEmptyRooms).isVisible = rooms.isEmpty()
+                        binding.tvEmptyRooms.isVisible = rooms.isEmpty()
                     }
                 }
             }

@@ -36,14 +36,14 @@ class SavedShipAdapter(
     }
 
     override fun onBindViewHolder(holder: SavedShipViewHolder, position: Int) {
-        holder.bind(getItem(position))
+        holder.bind(getItem(position), position)
     }
 
     inner class SavedShipViewHolder(
         private val binding: ItemSavedShipBinding,
     ) : RecyclerView.ViewHolder(binding.root) {
 
-        fun bind(item: SavedShip) {
+        fun bind(item: SavedShip, position: Int) {
             binding.tvShipName.text = item.name
             val count = roomCounts[item.id] ?: 0
             binding.tvRoomCount.text = binding.root.context.getString(R.string.ship_room_count_format, count)
@@ -56,13 +56,11 @@ class SavedShipAdapter(
             )
 
             binding.cardSavedShip.setOnClickListener {
-                val position = bindingAdapterPosition
                 if (position != RecyclerView.NO_POSITION) {
                     onSelectClick(getItem(position))
                 }
             }
             binding.btnDeleteShip.setOnClickListener {
-                val position = bindingAdapterPosition
                 if (position != RecyclerView.NO_POSITION) {
                     onDeleteClick(getItem(position))
                 }

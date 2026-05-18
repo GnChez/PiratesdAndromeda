@@ -21,17 +21,16 @@ class RoomAdapter(
     }
 
     override fun onBindViewHolder(holder: RoomViewHolder, position: Int) {
-        holder.bind(getItem(position))
+        holder.bind(getItem(position), position)
     }
 
     inner class RoomViewHolder(
         private val binding: ItemRoomBinding,
     ) : RecyclerView.ViewHolder(binding.root) {
 
-        fun bind(item: RoomItem) {
+        fun bind(item: RoomItem, position: Int) {
             binding.tvRoomName.text = item.name
             binding.btnDeleteRoom.setOnClickListener {
-                val position = bindingAdapterPosition
                 if (position != RecyclerView.NO_POSITION) {
                     onDeleteClick(getItem(position))
                 }

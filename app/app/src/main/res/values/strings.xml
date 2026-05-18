@@ -167,4 +167,30 @@
     <string name="player_info_email_value">Correu: %1$s</string>
     <string name="player_info_close">Tancar</string>
 
+
+    <!-- Mensajes de Autenticación -->
+    <string name="auth_session_started">Sesión iniciada</string>
+    <string name="auth_register_success">Registro exitoso</string>
+    <string name="auth_empty_email">El correo no puede estar vacío</string>
+    <string name="auth_empty_username">El usuario no puede estar vacío</string>
+    <string name="auth_empty_password">La contrasenya no pot estar buida</string>
+    <string name="auth_password_too_short">La contrasenya ha de tenir al menys 6 caràcters</string>
+    <string name="auth_password_mismatch">Les contrasenyes no coincideixen</string>
+    <string name="auth_missing_credentials">Per favor introdueix usuari o email</string>
+    <string name="auth_missing_password">Per favor introdueix contrasenya</string>
+    <string name="auth_api_timeout">La API no respon a temps. Revisa la teva connexió a Internet o que el servidor estigui disponible.</string>
+    <string name="auth_error_login">Error en inici de sessió</string>
+    <string name="auth_error_register">Error en registre</string>
+
+    <!-- Mensajes de Juego y Partidas -->
+    <string name="game_error_ship_creation">Error al crear nau: %1$s</string>
+    <string name="game_error_room_creation">Error al crear habitació: %1$s</string>
+    <string name="game_error_game_creation">❌ Error: %1$s</string>
+    <string name="game_error_join_game">❌ Error: %1$s</string>
+    <string name="game_enter_game_code">Introdueix un codi de partida</string>
+    <string name="game_ws_connection_success">🟢 Connexió WebSocket exitosa\n🎮 Partida: %1$s</string>
+    <string name="game_ws_connection_warning">⚠️ Partida creada però WebSocket sense codi</string>
+    <string name="game_joined_success">✅ Unit exitosament a partida: %1$s</string>
+    <string name="game_join_error_default">❌ No es va poder unir a la partida</string>
+
 </resources>

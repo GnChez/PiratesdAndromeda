@@ -4,7 +4,6 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Lifecycle
@@ -57,7 +56,7 @@ class LoginFragment : Fragment() {
                             AuthState.SUCCESS -> {
                                 binding.btnEntra.isEnabled = true
                                 binding.btnEntra.alpha = 1f
-                                Snackbar.make(binding.root, "Sesión iniciada", Snackbar.LENGTH_SHORT).show()
+                                Snackbar.make(binding.root, getString(R.string.auth_session_started), Snackbar.LENGTH_SHORT).show()
                                 // El MainActivity se encargará de navegar
                             }
                             AuthState.ERROR -> {
@@ -94,7 +93,18 @@ class LoginFragment : Fragment() {
         binding.btnEntra.setOnClickListener {
             val usuari = binding.etUsuari.text?.toString() ?: ""
             val contrasenya = binding.etContrasenya.text?.toString() ?: ""
-            viewModel.login(usuari, contrasenya)
+            
+            when {
+                usuari.isEmpty() -> {
+                    Snackbar.make(binding.root, getString(R.string.auth_missing_credentials), Snackbar.LENGTH_SHORT).show()
+                }
+                contrasenya.isEmpty() -> {
+                    Snackbar.make(binding.root, getString(R.string.auth_missing_password), Snackbar.LENGTH_SHORT).show()
+                }
+                else -> {
+                    viewModel.login(usuari, contrasenya)
+                }
+            }
         }
     }
 }
