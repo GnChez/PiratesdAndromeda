@@ -59,8 +59,7 @@ PiratesdAndromeda/
 ├── app/                 # Android application (Gradle project root)
 │   └── app/             # Android module source
 ├── web/                 # React web frontend
-├── arduino/             # ESP32 firmware for physical missions
-└── docs/                # Additional documentation
+└── arduino/             # ESP32 firmware for physical missions
 ```
 
 ---
@@ -162,7 +161,7 @@ cd app
 
 The APK is generated under `app/app/build/outputs/apk/debug/`.
 
-For splash screen and launcher icon customization, see [`app/SETUP_RAPIDO.md`](app/SETUP_RAPIDO.md).
+Copy `api/.env.example` to `api/.env` and adjust credentials before running the API locally.
 
 ---
 
@@ -174,7 +173,13 @@ Firmware lives in [`arduino/atrapa_verde_definitivo/`](arduino/atrapa_verde_defi
 - Reads NFC tags to identify players
 - Publishes mission events (`started`, `completed`) to MQTT topics consumed by the API
 
-Before flashing, update Wi-Fi credentials, MQTT broker settings, and client ID in the `.ino` file. See [`arduino/README.md`](arduino/README.md) for details.
+Before flashing, update Wi-Fi credentials, MQTT broker settings, and client ID in each `.ino` file.
+
+| Firmware | Description |
+|----------|-------------|
+| `atrapa_verde_definitivo/` | Catch-the-light mission with NFC and MQTT |
+| `simon_dice_definitivo/` | Simon Says mission station |
+| `calibracion_definitivo/` | Device calibration utility |
 
 ---
 
@@ -228,17 +233,6 @@ In-person games (`presencial: true`) can require physical device confirmation be
 | `VITE_APP_DOWNLOAD_URL` | Web | App download link for QR page |
 
 MQTT topics follow the pattern `juego/devices/#` (device events) and `juego/commands/#` (server commands).
-
----
-
-## Additional documentation
-
-| Document | Description |
-|----------|-------------|
-| [`app/SETUP_RAPIDO.md`](app/SETUP_RAPIDO.md) | Quick setup for splash screen and app icon |
-| [`CAMBIOS_IMPLEMENTADOS.md`](CAMBIOS_IMPLEMENTADOS.md) | WebSocket and connection implementation notes |
-| [`ESTRUCTURA_CARPETAS.md`](ESTRUCTURA_CARPETAS.md) | Folder structure reference (Spanish) |
-| [`INDICE_DOCUMENTOS.md`](INDICE_DOCUMENTOS.md) | Index of all project documents |
 
 ---
 
