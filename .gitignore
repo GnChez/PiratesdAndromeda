@@ -1,1 +1,29 @@
+# Python
 *.pyc
+__pycache__/
+.venv/
+venv/
+
+# Environment
+.env
+*.env.local
+
+# IDE
+.idea/
+*.iml
+.vscode/
+
+# Android
+app/.idea/
+app/local.properties
+app/**/build/
+*.apk
+*.aab
+
+# Node
+web/node_modules/
+web/dist/
+
+# OS
+.DS_Store
+Thumbs.db
