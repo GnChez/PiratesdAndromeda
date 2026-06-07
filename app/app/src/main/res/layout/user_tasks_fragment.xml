@@ -1,0 +1,181 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/backgroundbasic"
+    android:fillViewport="true">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:padding="16dp">
+
+        <!-- ── TÍTULO ── -->
+
+        <TextView
+            android:id="@+id/tvLaboresTitle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="80dp"
+            android:text="@string/labores_title"
+            android:textAppearance="@style/TextAppearance.Piratas.Title"
+            tools:text="Labores del tripulante:"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+        <!-- ── PUNTOS DEL JUGADOR (ARRIBA DERECHA) ── -->
+
+        <TextView
+            android:id="@+id/tvPuntosJugador"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="16dp"
+            android:background="@drawable/btn_icon_circle"
+            android:gravity="center"
+            android:padding="12dp"
+            android:text="0"
+            android:textColor="@color/blanco"
+            android:textSize="18sp"
+            android:fontFamily="@font/pirata"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            tools:text="250" />
+
+        <!-- ── TABS FILTRO ── -->
+
+        <com.google.android.material.tabs.TabLayout
+            android:id="@+id/tabsFiltro"
+            android:layout_width="0dp"
+            android:layout_height="40dp"
+            android:layout_marginTop="16dp"
+            android:background="@android:color/transparent"
+            app:tabBackground="@drawable/btnclaro"
+            app:tabRippleColor="@android:color/transparent"
+            app:tabSelectedTextColor="@color/blanco"
+            app:tabTextColor="@color/anaranjado"
+            app:tabIndicatorHeight="0dp"
+            app:tabTextAppearance="@style/TextAppearance.Piratas.Section"
+            app:layout_constraintTop_toBottomOf="@id/tvLaboresTitle"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent">
+
+            <com.google.android.material.tabs.TabItem
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/labores_tab_todos" />
+
+            <com.google.android.material.tabs.TabItem
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/labores_tab_pendientes" />
+
+            <com.google.android.material.tabs.TabItem
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/labores_tab_terminados" />
+
+        </com.google.android.material.tabs.TabLayout>
+
+        <!-- ── CARD LISTA DE TAREAS ── -->
+
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/cardTareas"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_marginTop="16dp"
+            android:layout_marginBottom="88dp"
+            app:cardBackgroundColor="#CC3B1010"
+            app:cardCornerRadius="16dp"
+            app:cardElevation="0dp"
+            app:layout_constraintTop_toBottomOf="@id/tabsFiltro"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent">
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:padding="12dp">
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/rvTareas"
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:nestedScrollingEnabled="false"
+                    android:clipToPadding="false"
+                    android:contentDescription="Lista de tareas"
+                    tools:listitem="@layout/item_user_task"
+                    tools:itemCount="6"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent" />
+
+                <!-- Mensaje vacío -->
+                <TextView
+                    android:id="@+id/tvEmpty"
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:gravity="center"
+                    android:text="No hay tareas disponibles"
+                    android:textColor="@color/anaranjado"
+                    android:fontFamily="@font/pirata"
+                    android:textSize="18sp"
+                    android:visibility="gone"
+                    tools:visibility="visible"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- ── BOTÓN CERRAR (izquierda) ── -->
+
+        <ImageButton
+            android:id="@+id/btnClose"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_marginBottom="16dp"
+            android:background="@drawable/btn_icon_circle"
+            android:contentDescription="@string/cd_close"
+            android:padding="10dp"
+            android:scaleType="centerInside"
+            android:src="@drawable/ic_close"
+            app:tint="@color/blanco"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent" />
+
+        <!--
+            ── BOTÓN SABOTEAR (solo visible para el IMPOSTOR) ──
+            Oculto por defecto. El Fragment lo hace visible si jugadorActual.rol == IMPOSTOR.
+        -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnSabotear"
+            style="@style/Widget.PiratasDeAndromeda.DarkButton"
+            android:layout_width="wrap_content"
+            android:layout_height="48dp"
+            android:layout_marginBottom="16dp"
+            android:background="@android:color/transparent"
+            android:backgroundTint="@android:color/transparent"
+            android:text="☠ Sabotear"
+            android:textSize="14sp"
+            android:visibility="gone"
+            tools:visibility="visible"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

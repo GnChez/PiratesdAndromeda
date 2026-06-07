@@ -7,6 +7,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.activityViewModels
 import cat.hajoya.piratasdeandromeda.databinding.IniciBinding
+import cat.hajoya.piratasdeandromeda.ui.preparacio.StartPartidaFragment
 import kotlin.getValue
 
 
@@ -43,8 +44,18 @@ class IniciFragment: Fragment() {
     }
 
     private fun setupListeners(){
-        binding.btnRegistrate.setOnClickListener {
-// anar  al fragment de registre
+        binding.tvSignUp.setOnClickListener {
+            parentFragmentManager.beginTransaction()
+                .replace(R.id.fragment_container, RegisterFragment())
+                .addToBackStack(null)
+                .commit()
+        }
+
+        binding.btnEntra.setOnClickListener {
+            parentFragmentManager.beginTransaction()
+                .replace(R.id.fragment_container, StartPartidaFragment())
+                .addToBackStack(null)
+                .commit()
         }
 
     }

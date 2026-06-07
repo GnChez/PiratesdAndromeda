@@ -1,9 +1,28 @@
-<resources xmlns:tools="http://schemas.android.com/tools">
+<resources>
     <!-- Base application theme. -->
     <style name="Base.Theme.PiratasDeAndromeda" parent="Theme.Material3.DayNight.NoActionBar">
-        <!-- Customize your light theme here. -->
-        <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
+        <item name="colorPrimary">@color/anaranjado</item>
+        <item name="colorOnPrimary">@color/blanco</item>
+        <item name="colorPrimaryContainer">@color/primary_container_dark</item>
+        <item name="colorOnPrimaryContainer">@color/blanco</item>
+
+        <item name="colorSurface">@color/surface_dark</item>
+        <item name="colorSurfaceVariant">@color/surface_variant_dark</item>
+        <item name="colorOnSurface">@color/on_surface_soft</item>
+        <item name="colorOnSurfaceVariant">@color/on_surface_soft</item>
+        <item name="colorOutline">@color/outline_soft</item>
+        <item name="colorOutlineVariant">@color/outline_soft_variant</item>
+
+        <item name="android:fontFamily">@font/pirata</item>
     </style>
 
+    <!-- Tema para el Splash Screen -->
+    <style name="Theme.PiratasDeAndromeda.Splash" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenAnimatedIcon">@drawable/relieve</item>
+        <item name="windowSplashScreenBackground">@color/anaranjado</item>
+        <item name="postSplashScreenTheme">@style/Theme.PiratasDeAndromeda</item>
+    </style>
+
+    <!-- Tema principal de la aplicación -->
     <style name="Theme.PiratasDeAndromeda" parent="Base.Theme.PiratasDeAndromeda" />
 </resources>

@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Cables</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: #0a0e1a;
+    color: #e2e8f0;
+    font-family: monospace;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    user-select: none;
+  }
+
+  #header {
+    font-size: 13px;
+    color: #64748b;
+    margin-bottom: 10px;
+    letter-spacing: 1px;
+  }
+
+  #board {
+    width: 92vw;
+    height: 78vh;
+    background: #111827;
+    border: 1px solid #1e2d45;
+    border-radius: 16px;
+    display: grid;
+    grid-template-columns: 30% 40% 30%;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .col {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    align-items: center;
+    padding: 20px 0;
+    z-index: 1;
+  }
+
+  .cable {
+    width: 85%;
+    height: 46px;
+    cursor: pointer;
+    border: 2px solid rgba(255,255,255,0.1);
+    display: flex;
+    align-items: center;
+    transition: transform 0.12s;
+  }
+
+  #colLeft  .cable { border-radius: 999px 6px 6px 999px; justify-content: flex-end;   padding-right: 12px; }
+  #colRight .cable { border-radius: 6px 999px 999px 6px; justify-content: flex-start; padding-left:  12px; }
+
+  .cable::after {
+    content: '';
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.55);
+    flex-shrink: 0;
+  }
+
+  .cable.selected {
+    transform: scale(1.07);
+    border-color: rgba(255,255,255,0.6);
+    z-index: 5;
+  }
+
+  .cable.done      { opacity: 0.25; pointer-events: none; }
+  .cable.error     { outline: 3px solid #ef4444; }
+
+  #svgLayer {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+  }
+</style>
+</head>
+<body>
+
+<div id="header">NIVEL <span id="lvlNum">1</span> / 3</div>
+
+<div id="board">
+  <svg id="svgLayer"></svg>
+  <div id="colLeft"  class="col"></div>
+  <div id="colMid"   class="col"></div>
+  <div id="colRight" class="col"></div>
+</div>
+
+<script>
+const LEVEL_COUNTS = [3, 4, 5];
+
+const PALETTE = [
+  { color: "#ef4444" },
+  { color: "#3b82f6" },
+  { color: "#22c55e" },
+  { color: "#eab308" },
+  { color: "#a855f7" },
+];
+
+let currentLevel = 0;
+let selected = null;
+let solved = 0;
+let total  = 0;
+
+const colLeft  = document.getElementById("colLeft");
+const colRight = document.getElementById("colRight");
+const svgEl    = document.getElementById("svgLayer");
+const lvlNum   = document.getElementById("lvlNum");
+
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function buildLevel(idx) {
+  colLeft.innerHTML  = "";
+  colRight.innerHTML = "";
+  svgEl.innerHTML    = "";
+  selected = null;
+  solved   = 0;
+  total    = LEVEL_COUNTS[idx];
+  lvlNum.textContent = idx + 1;
+
+  const chosen     = shuffle(PALETTE).slice(0, total);
+  const leftOrder  = shuffle([...chosen]);
+  const rightOrder = shuffle([...chosen]);
+
+  leftOrder.forEach(p  => colLeft.appendChild(makeCable(p, "left")));
+  rightOrder.forEach(p => colRight.appendChild(makeCable(p, "right")));
+}
+
+function makeCable(p, side) {
+  const el = document.createElement("div");
+  el.className = "cable";
+  el.style.background = p.color;
+  el.dataset.color = p.color;
+  el.dataset.side  = side;
+  el.addEventListener("click", () => onCableClick(el));
+  return el;
+}
+
+function onCableClick(el) {
+  if (el.classList.contains("done")) return;
+
+  document.querySelectorAll(".cable").forEach(c => c.classList.remove("selected"));
+
+  if (!selected) {
+    selected = el;
+    el.classList.add("selected");
+    return;
+  }
+
+  if (selected === el) {
+    selected = null;
+    return;
+  }
+
+  // Same side → swap selection
+  if (selected.dataset.side === el.dataset.side) {
+    selected = el;
+    el.classList.add("selected");
+    return;
+  }
+
+  // Different sides
+  if (selected.dataset.color === el.dataset.color) {
+    drawLine(selected, el);
+    selected.classList.add("done");
+    el.classList.add("done");
+    selected = null;
+    solved++;
+    if (solved === total) setTimeout(onLevelComplete, 400);
+  } else {
+    el.classList.add("error");
+    selected.classList.add("error");
+    setTimeout(() => {
+      el.classList.remove("error");
+      selected && selected.classList.remove("error");
+      selected = null;
+    }, 500);
+  }
+}
+
+function drawLine(a, b) {
+  const board   = document.getElementById("board").getBoundingClientRect();
+  const leftEl  = a.dataset.side === "left" ? a : b;
+  const rightEl = a.dataset.side === "left" ? b : a;
+  const rl = leftEl.getBoundingClientRect();
+  const rr = rightEl.getBoundingClientRect();
+
+  const x1 = rl.right - board.left;
+  const y1 = rl.top + rl.height / 2 - board.top;
+  const x2 = rr.left  - board.left;
+  const y2 = rr.top + rr.height / 2 - board.top;
+  const cx = (x1 + x2) / 2;
+  const d  = `M${x1},${y1} C${cx},${y1} ${cx},${y2} ${x2},${y2}`;
+
+  const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+  path.setAttribute("d", d);
+  path.setAttribute("stroke", leftEl.dataset.color);
+  path.setAttribute("stroke-width", "5");
+  path.setAttribute("fill", "none");
+  path.setAttribute("stroke-linecap", "round");
+  path.setAttribute("opacity", "0.9");
+  svgEl.appendChild(path);
+}
+
+function onLevelComplete() {
+  if (currentLevel < 2) {
+    currentLevel++;
+    buildLevel(currentLevel);
+  } else {
+    if (window.AndroidBridge) window.AndroidBridge.onGameCompleted();
+    try { window.postMessage("GAME_COMPLETED"); } catch(e) {}
+    try { window.location.href = "app://GAME_COMPLETED"; } catch(e) {}
+  }
+}
+
+buildLevel(0);
+</script>
+</body>
+</html>

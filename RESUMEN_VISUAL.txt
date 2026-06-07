@@ -1,0 +1,230 @@
+
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                                                                              ║
+║           🚀 PIRATAS DE ANDROMEDA - SPLASH SCREEN E ICONO PERSONALIZADOS    ║
+║                                                                              ║
+║                          ✅ PROYECTO LISTO PARA USAR                        ║
+║                                                                              ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+
+
+╔─────────────────────────────── 🎯 OBJETIVOS ──────────────────────────────╗
+│                                                                              │
+│  1. ✨ SPLASH SCREEN personalizada con tu imagen (relieve.png)             │
+│  2. 🎨 ICONO DE APP personalizado con tu imagen                            │
+│                                                                              │
+│  📊 ESTADO: 100% Preparado - Solo falta tu imagen                          │
+│                                                                              │
+╚──────────────────────────────────────────────────────────────────────────────╝
+
+
+╔─────────────────────────── 📊 ESTRUCTURA CREADA ──────────────────────────╗
+│                                                                             │
+│  En la carpeta: PiratesdAndromeda/                                         │
+│                                                                             │
+│  Documentos de INSTRUCCIONES:                                              │
+│  ├─ 📄 COMIENZA_AQUI.txt                    ← ABRE ESTO PRIMERO           │
+│  ├─ 📄 README_INICIO.md                     ← Resumen de todo            │
+│  ├─ 📄 SETUP_RAPIDO.md ⚡                   ← Guía de 2 minutos          │
+│  ├─ 📄 INSTRUCCIONES_IMAGEN_PERSONALIZADA.md ← Guía COMPLETA (detallada)│
+│  ├─ 📄 ESTRUCTURA_CARPETAS.md               ← Mapeo de carpetas          │
+│  └─ 📄 CHECKLIST_VERIFICACION.md            ← Lista de verificación      │
+│                                                                             │
+│  En la carpeta: PiratesdAndromeda/app/                                     │
+│                                                                             │
+│  Scripts AUTOMÁTICOS:                                                      │
+│  ├─ 🔧 setup_app_icon_windows.ps1           ← PowerShell (recomendado)   │
+│  ├─ 🔧 setup_app_icon_windows.bat           ← Batch (alternativa)        │
+│  └─ 📄 SETUP_RAPIDO.md                      ← Guía rápida aquí            │
+│                                                                             │
+╚─────────────────────────────────────────────────────────────────────────────╝
+
+
+╔────────────────────── 🎯 LO QUE TIENES QUE HACER ──────────────────────────╗
+│                                                                              │
+│  PASO 1️⃣  │ Prepara tu imagen:                                              │
+│           ├─ Nombre: relieve.png                                            │
+│           ├─ Formato: PNG                                                   │
+│           ├─ Tamaño mínimo: 512x512 px                                      │
+│           └─ Forma: Cuadrado (1:1)                                          │
+│                                                                              │
+│  PASO 2️⃣  │ Coloca en Drawable (Splash Screen):                            │
+│           ├─ Ruta: app\app\src\main\res\drawable\                          │
+│           └─ Archivo: relieve.png                                           │
+│           ⏱️  TIEMPO: 1 minuto                                              │
+│           ✅ RESULTADO: Splash Screen funciona automáticamente              │
+│                                                                              │
+│  PASO 3️⃣  │ Genera/Coloca en Mipmap (Icono de App):                        │
+│           │ Elige UNA opción:                                               │
+│           │                                                                  │
+│           ├─ OPCIÓN A: 🤖 Script Automático (Recomendado)                 │
+│           │            └─ Coloca relieve.png en: app/                     │
+│           │            └─ Ejecuta: setup_app_icon_windows.ps1 (doble clic) │
+│           │            └─ ⏱️  1 minuto (si tienes ImageMagick)             │
+│           │                                                                  │
+│           ├─ OPCIÓN B: 🎨 Android Studio (Muy fácil)                      │
+│           │            └─ File → New → Image Asset                         │
+│           │            └─ Selecciona relieve.png                           │
+│           │            └─ ⏱️  3 minutos                                    │
+│           │                                                                  │
+│           └─ OPCIÓN C: 🌐 Online (Sin instalar nada)                      │
+│                        └─ https://romannunik.github.io/AsyncAssetStudio     │
+│                        └─ Sube relieve.png                                  │
+│                        └─ ⏱️  5 minutos                                    │
+│                                                                              │
+│  PASO 4️⃣  │ Sincroniza y Prueba:                                           │
+│           ├─ Android Studio → Build → Sync Now                             │
+│           ├─ Ejecuta: Shift + F10                                           │
+│           └─ Verifica que ves tu imagen                                     │
+│           ⏱️  TIEMPO: 5 minutos                                             │
+│                                                                              │
+╚──────────────────────────────────────────────────────────────────────────────╝
+
+
+╔─────────────────── 📍 UBICACIÓN EXACTA DE TUS ARCHIVOS ────────────────────╗
+│                                                                              │
+│  SPLASH SCREEN:                                                            │
+│  ┌────────────────────────────────────────────────────────────────────┐   │
+│  │ C:\Users\hnnzp\AndroidStudioProjects\PiratesdAndromeda\           │   │
+│  │             app\app\src\main\res\drawable\relieve.png             │   │
+│  │                                                   ↑↑↑↑↑↑↑↑         │   │
+│  │                          TU IMAGEN VA AQUÍ                        │   │
+│  └────────────────────────────────────────────────────────────────────┘   │
+│                                                                              │
+│  ICONOS DE APP:                                                            │
+│  ┌────────────────────────────────────────────────────────────────────┐   │
+│  │ C:\Users\hnnzp\AndroidStudioProjects\PiratesdAndromeda\           │   │
+│  │             app\app\src\main\res\mipmap-DENSIDAD\                 │   │
+│  │                                                                     │   │
+│  │  Reemplaza en TODAS estas carpetas:                               │   │
+│  │  • mipmap-mdpi        (48x48 px)                                   │   │
+│  │  • mipmap-hdpi        (72x72 px)                                   │   │
+│  │  • mipmap-xhdpi       (96x96 px)                                   │   │
+│  │  • mipmap-xxhdpi      (144x144 px)                                │   │
+│  │  • mipmap-xxxhdpi     (192x192 px)                                │   │
+│  │                                                                     │   │
+│  │  Archivos a reemplazar:                                            │   │
+│  │  ✅ ic_launcher.webp                                              │   │
+│  │  ✅ ic_launcher_round.webp                                        │   │
+│  │                                                                     │   │
+│  │  💡 El script o Android Studio lo hace AUTOMÁTICAMENTE            │   │
+│  └────────────────────────────────────────────────────────────────────┘   │
+│                                                                              │
+╚──────────────────────────────────────────────────────────────────────────────╝
+
+
+╔──────────────────────── ✅ QUÉ YA ESTÁ HECHO ──────────────────────────────╗
+│                                                                              │
+│  ✅ Splash Screen ya está configurada en el código                          │
+│  ✅ Tema SplashScreen ya está definido                                      │
+│  ✅ AuthActivity usa installSplashScreen()                                  │
+│  ✅ Carpetas drawable/ y mipmap-*/ ya existen                               │
+│  ✅ AndroidManifest.xml ya referencia los iconos                            │
+│  ✅ Colores y tema personalizado ya están listos                            │
+│  ✅ El sistema está 100% preparado                                          │
+│                                                                              │
+│  SOLO FALTA: Tu imagen + ejecutar un comando (o doble clic)               │
+│                                                                              │
+╚──────────────────────────────────────────────────────────────────────────────╝
+
+
+╔───────────────── 📚 GUÍAS RECOMENDADAS POR SITUACIÓN ─────────────────────╗
+│                                                                              │
+│  ⏱️  "Solo quiero hacerlo rápido" (2 minutos)                              │
+│  └─→ Lee: SETUP_RAPIDO.md                                                  │
+│                                                                              │
+│  🎯 "Quiero entenderlo todo" (10 minutos)                                  │
+│  └─→ Lee: README_INICIO.md (este) + INSTRUCCIONES_IMAGEN_PERSONALIZADA.md │
+│                                                                              │
+│  📍 "Necesito saber exactamente dónde va cada cosa"                        │
+│  └─→ Lee: ESTRUCTURA_CARPETAS.md                                           │
+│                                                                              │
+│  ✅ "Quiero verificar que todo está bien mientras avanzo"                  │
+│  └─→ Usa: CHECKLIST_VERIFICACION.md                                        │
+│                                                                              │
+│  🆘 "Algo no funciona y necesito ayuda"                                   │
+│  └─→ Lee: INSTRUCCIONES_IMAGEN_PERSONALIZADA.md (Sección: Solución)      │
+│                                                                              │
+╚──────────────────────────────────────────────────────────────────────────────╝
+
+
+╔──────────────────────── 🚀 PROCEDIMIENTO RÁPIDO ──────────────────────────╗
+│                                                                             │
+│  1. Obtén tu imagen: relieve.png                                           │
+│  2. Copia a: app\app\src\main\res\drawable\relieve.png                    │
+│  3. Ejecuta UN script O usa Android Studio Image Asset                    │
+│  4. Android Studio → Build → Sync Now                                     │
+│  5. Android Studio → Shift + F10 (ejecutar)                               │
+│  6. ¡Listo! Tu imagen está en la app                                      │
+│                                                                             │
+║  ⏱️  TIEMPO TOTAL: 5-10 minutos                                            │
+║                                                                             │
+╚─────────────────────────────────────────────────────────────────────────────╝
+
+
+╔──────────────────── 💾 ARCHIVOS GENERADOS PARA TI ────────────────────────╗
+│                                                                             │
+│  Documentación:            Ubicación:                                      │
+│  ┌──────────────────────────────────────────────────────────────┐         │
+│  │ COMIENZA_AQUI.txt                   PiratesdAndromeda/        │         │
+│  │ README_INICIO.md                    PiratesdAndromeda/        │         │
+│  │ SETUP_RAPIDO.md                     PiratesdAndromeda/app/    │         │
+│  │ INSTRUCCIONES_IMAGEN_PERSONAL...md  PiratesdAndromeda/        │         │
+│  │ ESTRUCTURA_CARPETAS.md              PiratesdAndromeda/        │         │
+│  │ CHECKLIST_VERIFICACION.md           PiratesdAndromeda/        │         │
+│  └──────────────────────────────────────────────────────────────┘         │
+│                                                                             │
+│  Scripts:                   Ubicación:                                     │
+│  ┌──────────────────────────────────────────────────────────────┐         │
+│  │ setup_app_icon_windows.ps1          PiratesdAndromeda/app/    │         │
+│  │ setup_app_icon_windows.bat          PiratesdAndromeda/app/    │         │
+│  └──────────────────────────────────────────────────────────────┘         │
+│                                                                             │
+│  ✨ TODO está listo para que SOLO AGREGUES tu imagen                      │
+│                                                                             │
+╚─────────────────────────────────────────────────────────────────────────────╝
+
+
+╔─────────────────────── 🎨 RESULTADO FINAL ESPERADO ───────────────────────╗
+│                                                                              │
+│  Cuando ejecutes la app verás:                                              │
+│                                                                              │
+│  ┌─────────────────────────────┐                                           │
+│  │                             │                                           │
+│  │                             │                                           │
+│  │     SPLASH SCREEN           │     Durante 2-3 segundos:                │
+│  │     (TU IMAGEN)             │     • Fondo naranja (#E47B1B)            │
+│  │                             │     • Tu imagen centrada                 │
+│  │                             │     • Transición suave                   │
+│  │                             │                                           │
+│  └─────────────────────────────┘                                           │
+│           ↓↓↓                                                               │
+│  ┌─────────────────────────────┐                                           │
+│  │  LOGIN SCREEN               │     Después de la splash:                │
+│  │  (o pantalla principal)     │     • App carga normalmente             │
+│  │                             │     • Tu icono está en el menú           │
+│  └─────────────────────────────┘                                           │
+│                                                                              │
+│  En el menú de aplicaciones:                                                │
+│  ┌──────────────────────┐                                                  │
+│  │ 🎨 ICONO PERSONALIZADO                                                  │
+│  │    (Tu imagen)                                                           │
+│  │    Piratas de Andromeda                                                 │
+│  └──────────────────────┘                                                  │
+│                                                                              │
+╚──────────────────────────────────────────────────────────────────────────────╝
+
+
+╔────────────────────────── ✨ ¡BIENVENIDO! ✨ ────────────────────────────╗
+│                                                                             │
+│  Tu aplicación está lista para usar tu imagen personalizada.               │
+│                                                                             │
+│  Próximo paso: Abre COMIENZA_AQUI.txt o SETUP_RAPIDO.md                  │
+│                                                                             │
+│  ⏱️  Tiempo de configuración: 5-10 minutos                                │
+│  🚀 Resultado: Splash screen + rígido personalizados                      │
+│  ✨ Dificultad: ⭐ Muy fácil                                              │
+│                                                                             │
+╚─────────────────────────────────────────────────────────────────────────────╝
+
+

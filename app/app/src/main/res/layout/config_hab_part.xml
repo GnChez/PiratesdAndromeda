@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.core.widget.NestedScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/backgroundbasic"
+    android:fillViewport="true">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="16dp">
+
+        <TextView
+            android:id="@+id/tvHeroTitle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="@string/config_rooms_title"
+            android:textAppearance="@style/TextAppearance.Piratas.Title"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+        <TextView
+            android:id="@+id/tvConfigLabel"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="@string/config_rooms_subtitle"
+            android:textAppearance="@style/TextAppearance.Piratas.Section"
+            android:textSize="22sp"
+            app:layout_constraintTop_toBottomOf="@id/tvHeroTitle"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rvRooms"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:nestedScrollingEnabled="false"
+            android:clipToPadding="false"
+            tools:listitem="@layout/item_room"
+            tools:itemCount="3"
+            app:layout_constraintTop_toBottomOf="@id/tvConfigLabel"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"/>
+
+        <TextView
+            android:id="@+id/tvEmptyRooms"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:gravity="center"
+            android:importantForAccessibility="yes"
+            android:text="@string/empty_rooms_message"
+            android:textAppearance="@style/TextAppearance.Piratas.Section"
+            android:textSize="16sp"
+            android:visibility="gone"
+            app:layout_constraintTop_toBottomOf="@id/rvRooms"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+        <EditText
+            android:id="@+id/edRoomName"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:layout_marginTop="12dp"
+            android:background="@drawable/edittext"
+            android:hint="@string/config_room_name_hint"
+            android:inputType="textCapWords"
+            android:autofillHints="name"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
+            android:textColor="@color/anaranjado"
+            android:textColorHint="@color/anaranjado"
+            android:textSize="16sp"
+            app:layout_constraintTop_toBottomOf="@id/tvEmptyRooms"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/btnAddRoom" />
+
+        <Button
+            android:id="@+id/btnAddRoom"
+            style="@style/Widget.PiratasDeAndromeda.ClassicButton"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginEnd="0dp"
+            android:background="@drawable/btn_icon_circle"
+            android:backgroundTint="@null"
+            app:backgroundTint="@null"
+            android:padding="0dp"
+            android:includeFontPadding="false"
+            android:gravity="center"
+            android:text="@string/add_symbol"
+            android:contentDescription="@string/cd_add_room"
+            android:textColor="@color/blanco"
+            android:textSize="28sp"
+            app:layout_constraintTop_toTopOf="@id/edRoomName"
+            app:layout_constraintBottom_toBottomOf="@id/edRoomName"
+            app:layout_constraintStart_toEndOf="@id/edRoomName"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+        <ImageButton
+            android:id="@+id/btnCancel"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_marginTop="20dp"
+            android:layout_marginBottom="24dp"
+            android:background="@drawable/btn_icon_circle"
+            android:src="@drawable/ic_close"
+            app:tint="@color/blanco"
+            android:padding="0dp"
+            android:scaleType="centerInside"
+            android:contentDescription="@string/cd_cancel"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnSiguiente"
+            style="@style/Widget.PiratasDeAndromeda.PrimaryButton"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginEnd="0dp"
+            android:layout_marginTop="20dp"
+            android:layout_marginBottom="24dp"
+            android:text="@string/config_next_button"
+            app:layout_constraintStart_toEndOf="@id/btnCancel"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</androidx.core.widget.NestedScrollView>

@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Nom de l'app -->
+    <string name="app_name">Pirates d\'Andromeda</string>
+
+    <!-- Textos de la pantalla d'inici -->
+    <string name="escape_room">S A L A   D\'E S C A P A M E N T</string>
+    <string name="titulo_vertical">P I R A T A S\nD E\nA N D R O M E D A</string>
+
+    <!-- Textos del login -->
+    <string name="login">LOG IN</string>
+    <string name="sign_up">SIGN UP</string>
+    <string name="usuari">Usuari</string>
+    <string name="correo">Correu</string>
+    <string name="hint_usuari">Introdueix el teu usuari</string>
+    <string name="contrasenya">Contrasenya</string>
+    <string name="rep_contrasenya">Repeteix contrasenya</string>
+    <string name="hint_contrasenya">Introdueix la teva contrasenya</string>
+    <string name="login_subrallado"><u>LOG IN</u></string>
+    <string name="sign_up_subrallado"><u>SIGN UP</u></string>
+
+    <!-- Botons -->
+    <string name="btn_entra">ENTRA</string>
+    <string name="btn_registrate">REGISTRA\'T</string>
+
+    <!-- Pantalla Start FR -->
+    <string name="start_fr_welcome">AAARR!\nBenvingut/da a bord,\ntria la teva nau</string>
+    <string name="start_fr_profile_cd">Obrir perfil</string>
+    <string name="start_fr_join_label">Unir-me a una partida</string>
+    <string name="start_fr_game_code_hint">Codi de partida</string>
+    <string name="start_fr_game_code_cd">Introdueix el codi de la partida</string>
+    <string name="start_fr_join_button">Unir-me</string>
+    <string name="start_fr_join_cd">Unir-se a una partida</string>
+    <string name="start_fr_create_label">Crear partida</string>
+    <string name="start_fr_create_button">Crear</string>
+    <string name="start_fr_create_cd">Crear una partida nova</string>
+
+    <!-- Navegacio -->
+    <string name="go_to_register_cd">Ves a registre</string>
+    <string name="go_to_login_cd">Ves a inici de sessió</string>
+
+    <!-- Configuracio de partida -->
+    <string name="cd_planet_background">Fons de portada</string>
+    <string name="cd_user_avatar">Avatar d\'usuari</string>
+    <string name="cd_close_session">Tancar sessió</string>
+    <string name="cd_cancel">Cancellar</string>
+    <string name="cd_add_room">Afegir habitació</string>
+    <string name="cd_delete_room">Eliminar habitació</string>
+    <string name="cd_create_ship">Crear nau amb el nom introduit</string>
+    <string name="cd_delete_ship">Eliminar nau desada</string>
+    <string name="cd_back">Tornar enrere</string>
+
+    <string name="config_part_title">AAARR!\nAra toca posar-la\na punt!</string>
+    <string name="config_saved_ships">Naus desades:</string>
+    <string name="config_ship_name_label">Introdueix aqui el nom de la teva nau:</string>
+    <string name="config_ship_name_hint">Ex.: Nau Rom Vessat</string>
+    <string name="config_code_label">Introdueix el codi de la partida:</string>
+    <string name="config_code_hint">Codi de la partida</string>
+    <string name="config_join_button">Unir-me</string>
+    <string name="config_rooms_title">EEEYYY! Quants camarots hi ha a la teva nau?</string>
+    <string name="config_rooms_subtitle">Configura les sales de la nau:</string>
+    <string name="config_room_name_hint">Introdueix el nom de l\'habitació</string>
+    <string name="config_next_button">Seguent</string>
+
+    <string name="empty_ships_message">Cap nau desada. Crea la teva primera nau!</string>
+    <string name="empty_rooms_message">Cap habitació. Afegeix sales a la nau!</string>
+    <string name="error_empty_ship_name">El nom de la nau no pot estar buit</string>
+    <string name="error_ship_name_too_long">El nom és massa llarg (màx. 50 caràcters)</string>
+    <string name="error_empty_room_name">El nom de l\'habitació no pot estar buit</string>
+    <string name="error_empty_code">El codi de partida no pot estar buit</string>
+    <string name="ship_deleted_ok">&quot;%1$s&quot; eliminada</string>
+    <string name="room_deleted_ok">Habitació &quot;%1$s&quot; eliminada</string>
+    <string name="ship_room_count_format">%1$d habitacions</string>
+    <string name="settings_saved_ok">Canvis desats correctament</string>
+
+    <string name="players_title">A bord, que l\'odissea comenca ara!</string>
+    <string name="players_code_label">Codi de partida:</string>
+    <string name="players_label">Jugadors a bord:</string>
+    <string name="players_impostores_label">Nombre d\'impostors</string>
+    <string name="players_impostors_hint">Nombre d\'impostors</string>
+    <string name="players_start_button">Comencar!</string>
+    <string name="players_sample_code">12345</string>
+    <string name="add_symbol">+</string>
+
+    <string name="delete_ship_dialog_message">Segur que vols eliminar &quot;%1$s&quot;?</string>
+    <string name="delete_ship_dialog_title">Eliminar nau</string>
+    <string name="delete_ship_dialog_confirm">Acceptar</string>
+    <string name="delete_ship_dialog_cancel">Cancellar</string>
+
+    <!-- Settings -->
+    <string name="settings_title">Configuració</string>
+
+    <!-- Secció: Perfil -->
+    <string name="settings_section_profile">Perfil</string>
+    <string name="settings_username_label">Nom d\'usuari</string>
+    <string name="settings_username_hint">Escriu el teu nom…</string>
+    <string name="settings_email_label">Correu electrònic</string>
+    <string name="settings_email_hint">example@correu.com</string>
+    <string name="settings_password_label">Contrasenya</string>
+    <string name="settings_password_hint">Nova contrasenya…</string>
+    <string name="settings_save_button">Desar</string>
+
+    <!-- Secció: Preferències -->
+    <string name="settings_section_prefs">Preferències</string>
+    <string name="settings_language_label">Idioma</string>
+    <string name="settings_language_default">Català</string>
+    <string name="settings_language_cd">Canviar idioma</string>
+    <string name="settings_dark_mode_label">Mode fosc</string>
+    <string name="settings_dark_mode_cd">Activar o desactivar mode fosc</string>
+
+    <!-- Secció: Compte -->
+    <string name="settings_section_account">Compte</string>
+    <string name="settings_delete_account_button">Eliminar compte</string>
+
+    <string name="home_welcome_title">Benvingut/da</string>
+    <string name="home_recent_games_label">Partides recents</string>
+    <string name="home_find_game_label">Trobar partida</string>
+    <string name="home_game_code_hint">Codi de partida</string>
+    <string name="home_search_button">Cercar</string>
+    <string name="home_start_game_button">Comencar una partida nova</string>
+
+    <!-- Menú del Juego -->
+    <string name="game_menu_title">AAARR!\nLa batalla comença!</string>
+    <string name="nav_camarotes">CAMAROTES</string>
+    <string name="nav_camarotes_cd">Veure els camarotes</string>
+    <string name="nav_labores">LABORES</string>
+    <string name="nav_labores_cd">Veure les labores</string>
+    <string name="nav_reunirse">REUNIR-SE</string>
+    <string name="nav_reunirse_cd">Reunir-se amb l\'equip</string>
+    <string name="nav_soltar_armas">SOLTAR ARMES</string>
+    <string name="nav_soltar_armas_cd">Soltar armes i acabar</string>
+
+    <!-- Labores / Tareas -->
+    <string name="labores_title">Labores del tripulante:</string>
+    <string name="labores_tab_todos">Tots</string>
+    <string name="labores_tab_pendientes">Pendents</string>
+    <string name="labores_tab_terminados">Completats</string>
+    <string name="labores_item_start_button">Comença</string>
+    <string name="cd_task_done">Marcar tasca com a completada</string>
+     <string name="cd_task_start">Iniciar tasca</string>
+    <string name="cd_close">Tancar</string>
+    <string name="cd_action">Acció</string>
+
+    <!-- Juego - Proceso -->
+    <string name="juego_proceso_title">Juego en proceso</string>
+    <string name="juego_proceso_estado">En procesó</string>
+    <string name="juego_completado_hecho">Fet!</string>
+    <string name="juego_completado_tiempo">Temps: %1$d segundos</string>
+    <string name="juego_completado_puntos">Punts: %1$d</string>
+
+</resources>
+

@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/cardSavedShip"
+    style="@style/Widget.PiratasDeAndromeda.Card"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="10dp"
+    android:clickable="true"
+    android:focusable="true">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingHorizontal="10dp"
+        android:paddingVertical="8dp">
+
+        <TextView
+            android:id="@+id/tvShipName"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/pirata"
+            android:textAppearance="@style/TextAppearance.Piratas.Section"
+            android:maxLines="1"
+            tools:text="Nave viajeros locos"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/btnDeleteShip"
+            android:layout_marginStart="15dp"
+            app:layout_constraintBottom_toTopOf="@id/tvRoomCount" />
+
+        <TextView
+            android:id="@+id/tvRoomCount"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/pirata"
+            android:textColor="@color/anaranjado_light"
+            android:textSize="12sp"
+            tools:text="3 habitaciones"
+            app:layout_constraintTop_toBottomOf="@id/tvShipName"
+            app:layout_constraintStart_toStartOf="@id/tvShipName" />
+
+        <ImageButton
+            android:id="@+id/btnDeleteShip"
+            style="@style/Widget.PiratasDeAndromeda.DeleteImageButton"
+            android:contentDescription="@string/cd_delete_ship"
+            android:src="@drawable/ic_close"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</com.google.android.material.card.MaterialCardView>

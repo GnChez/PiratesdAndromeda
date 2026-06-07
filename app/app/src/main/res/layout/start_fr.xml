@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.core.widget.NestedScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/backgroundbasic"
+    android:fillViewport="true">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="16dp">
+
+        <!-- Welcome -->
+        <TextView
+            android:id="@+id/tvWelcomeTitle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="@string/start_fr_welcome"
+            android:textAppearance="@style/TextAppearance.Piratas.Title"
+            android:textSize="34sp"
+            android:importantForAccessibility="yes"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+        <!-- Perfil -->
+        <ImageButton
+            android:id="@+id/btnCloseSession"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_marginTop="8dp"
+            android:background="@drawable/btn_icon_circle"
+            android:contentDescription="@string/start_fr_profile_cd"
+            android:padding="10dp"
+            android:scaleType="centerInside"
+            android:src="@drawable/perfil"
+            app:tint="@color/blanco"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+        <!-- Join label -->
+        <TextView
+            android:id="@+id/tvJoinLabel"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="@string/start_fr_join_label"
+            android:textAppearance="@style/TextAppearance.Piratas.Section"
+            android:textSize="24sp"
+            android:labelFor="@id/edPartidaCode"
+            app:layout_constraintTop_toBottomOf="@id/tvWelcomeTitle"
+            app:layout_constraintBottom_toTopOf="@id/tvCreateLabel"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+        <!-- Input -->
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/tilPartidaCode"
+            style="@style/Widget.PiratasDeAndromeda.TextInputLayout"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:hint="@string/start_fr_game_code_hint"
+            app:layout_constraintTop_toBottomOf="@id/tvJoinLabel"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/btnUnirse"
+            android:layout_marginTop="8dp">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/edPartidaCode"
+                style="@style/Widget.PiratasDeAndromeda.TextInputEditText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="text"
+                android:imeOptions="actionDone"
+                android:contentDescription="@string/start_fr_game_code_cd" />
+
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- Join button -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnUnirse"
+            style="@style/Widget.PiratasDeAndromeda.PrimaryButton"
+            android:layout_width="wrap_content"
+            android:layout_height="0dp"
+            android:text="@string/start_fr_join_button"
+            android:contentDescription="@string/start_fr_join_cd"
+            android:textSize="20sp"
+            app:layout_constraintTop_toTopOf="@id/tilPartidaCode"
+            app:layout_constraintBottom_toBottomOf="@id/tilPartidaCode"
+            app:layout_constraintStart_toEndOf="@id/tilPartidaCode"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:layout_marginStart="8dp" />
+
+        <!-- Create label -->
+        <TextView
+            android:id="@+id/tvCreateLabel"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="@string/start_fr_create_label"
+            android:textAppearance="@style/TextAppearance.Piratas.Section"
+            android:textSize="24sp"
+            app:layout_constraintBottom_toTopOf="@+id/btnCrear"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:layout_marginBottom="32dp" />
+
+        <!-- Create button -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnCrear"
+            style="@style/Widget.PiratasDeAndromeda.PrimaryButton"
+            android:layout_width="0dp"
+            android:layout_height="56dp"
+            android:text="@string/start_fr_create_button"
+            android:contentDescription="@string/start_fr_create_cd"
+            android:textSize="20sp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:layout_marginTop="12dp"
+            android:layout_marginBottom="24dp"
+            app:layout_constraintBottom_toBottomOf="parent" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</androidx.core.widget.NestedScrollView>
