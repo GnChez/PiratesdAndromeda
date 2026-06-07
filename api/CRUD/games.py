@@ -177,6 +177,65 @@ def player_game(db: Session, game_id: int) -> List[JugadoresPartida]:
     return db.exec(stmt).all()
 
 
+def get_game_scores(db: Session, game_id: int) -> dict[str, int]:
+    players = player_game(db, game_id)
+    return {
+        str(player.id_usuario): int(player.puntos_partida or 0)
+        for player in players
+    }
+
+
+def award_player_mission_points(
+    db: Session,
+    game_id: int,
+    user_id: int,
+    points: int,
+) -> JugadoresPartida | None:
+    row = get_player_row(db, game_id, user_id)
+    if row is None:
+        return None
+    row.puntos_partida = int(row.puntos_partida or 0) + int(points or 0)
+    row.misiones_completadas = int(row.misiones_completadas or 0) + 1
+    db.add(row)
+    db.commit()
+    db.refresh(row)
+    return row
+
+
+def award_player_sabotage_points(
+    db: Session,
+    game_id: int,
+    user_id: int,
+    points: int,
+) -> JugadoresPartida | None:
+    row = get_player_row(db, game_id, user_id)
+    if row is None:
+        return None
+    row.puntos_partida = int(row.puntos_partida or 0) + int(points or 0)
+    row.sabotajes_realizados = int(row.sabotajes_realizados or 0) + 1
+    db.add(row)
+    db.commit()
+    db.refresh(row)
+    return row
+
+
+def award_player_kill_points(
+    db: Session,
+    game_id: int,
+    user_id: int,
+    points: int,
+) -> JugadoresPartida | None:
+    row = get_player_row(db, game_id, user_id)
+    if row is None:
+        return None
+    row.puntos_partida = int(row.puntos_partida or 0) + int(points or 0)
+    row.eliminaciones_realizadas = int(row.eliminaciones_realizadas or 0) + 1
+    db.add(row)
+    db.commit()
+    db.refresh(row)
+    return row
+
+
 def mark_player_dead(
     db: Session,
     game_id: int,
