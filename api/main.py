@@ -1,3 +1,5 @@
+
+
 import asyncio
 from collections import Counter
 from contextlib import asynccontextmanager
@@ -87,7 +89,7 @@ async def lifespan(app: FastAPI):
                 pass
             except Exception:
                 pass
-            print("Sistema IoT Detenido")
+        print("Sistema IoT Detenido")
 
 
 app = FastAPI(lifespan=lifespan, title="AMONG US")
@@ -292,55 +294,36 @@ async def _complete_player_exit(
     ws_code: str,
     player_id: Optional[int],
     reason: str,
-    *,
-    remove_from_db: bool = False,
 ) -> None:
-    """Cierra el WS del jugador, invalida su token y notifica la sala.
-
-    La fila en `jugadores_partida` solo se borra si `remove_from_db` es True
-    (acción explícita `salir`). Una desconexión no debe eliminar al jugador de la partida.
-    """
     manager.disconnect(websocket, room_uuid)
     await _handle_reunion_player_exit(room_uuid, player_id)
     player_key = _player_public_id(player_id, ws_code)
-    display_name: Optional[str] = None
+    await manager.broadcast_to_room(
+        {
+            "event": "PLAYER_LEFT",
+            "player": player_key,
+            "reason": reason,
+        },
+        room_uuid,
+    )
     if player_id is not None:
-        with Session(engine) as db:
-            if game_id is not None:
-                display_name = games_crud.display_name_for_game_player(db, game_id, player_id)
-            else:
-                u = get_user(db, player_id)
-                if u is not None and (u.nombre_usuario or "").strip():
-                    display_name = (u.nombre_usuario or "").strip()
-    left_payload: dict[str, object] = {
-        "event": "PLAYER_LEFT",
-        "player": player_key,
-        "reason": reason,
-        "nombre_usuario": display_name,
-        "player_name": display_name,
-    }
-    await manager.broadcast_to_room(left_payload, room_uuid)
-    if player_id is not None and remove_from_db:
         try:
             _sync_remove_player_from_db(game_code, player_id)
         except Exception:
             pass
-    if player_id is not None and game_id is not None:
-        try:
-            with Session(engine) as db:
-                create_game_event_by_type(
-                    db,
-                    game_id,
-                    "jugador_desconectado",
-                    player_id,
-                    descripcion=reason,
-                )
-        except Exception:
-            pass
-    # Solo invalidar token al salir explícitamente de la partida; una caída de red no debe
-    # obligar a hacer POST /join otra vez con un token nuevo.
-    if remove_from_db:
-        manager.unregister_ws_code(ws_code)
+        if game_id is not None:
+            try:
+                with Session(engine) as db:
+                    create_game_event_by_type(
+                        db,
+                        game_id,
+                        "jugador_desconectado",
+                        player_id,
+                        descripcion=reason,
+                    )
+            except Exception:
+                pass
+    manager.unregister_ws_code(ws_code)
 
 
 async def _publish_mission_update(
@@ -427,7 +410,6 @@ async def _sabotage_mission(
     if game_id_for_score is not None:
         await _broadcast_score_updated(db, room_uuid, game_id_for_score, player_score)
     await _publish_mission_update(game_code, "sabotaged", player_key, mission_id)
-    return True
 
 
 async def _desabotage_mission(
@@ -436,10 +418,8 @@ async def _desabotage_mission(
     room_uuid: str,
     game_code: str,
     mission_id: int,
-) -> bool:
-    row = missions_crud.update_mission_desabotage(db, mission_id)
-    if row is None:
-        return False
+):
+    missions_crud.update_mission_desabotage(db, mission_id)
     await manager.broadcast_to_room(
         {
             "type": "DESABOTAGE",
@@ -449,7 +429,6 @@ async def _desabotage_mission(
         room_uuid,
     )
     await _publish_mission_update(game_code, "desabotaged", player_key, mission_id)
-    return True
 
 
 async def _start_mission(
@@ -458,29 +437,17 @@ async def _start_mission(
     room_uuid: str,
     game_code: str,
     mission_id: int,
-    player_id: int,
-) -> bool:
-    row = missions_crud.update_mission_start_time(db, mission_id)
-    if row is None:
-        return False
-    extra = _app_mission_ws_envelope(
-        db,
-        game_code=game_code,
-        mission_partida_id=mission_id,
-        player_id=player_id,
-        action="started",
-    )
+):
+    missions_crud.update_mission_start_time(db, mission_id)
     await manager.broadcast_to_room(
         {
             "type": "START_MISSION",
             "player": player_key,
             "mission_id": mission_id,
-            **extra,
         },
         room_uuid,
     )
     await _publish_mission_update(game_code, "started", player_key, mission_id)
-    return True
 
 
 async def _complete_mission(
@@ -499,12 +466,6 @@ async def _complete_mission(
     missions_crud.update_mission_completion(db, mission_id)
     mission = missions_crud.get_mission_by_game_mission_id(db, mission_id)
     game_mission = missions_crud.get_game_mission_row(db, mission_id)
-    if not newly:
-        return "already_done"
-    if game_mission is not None:
-        games_crud.add_mission_completion_points(
-            db, game_mission.id_partida, player_id, mission_id
-        )
     if mission is not None and game_mission is not None:
         if not completed_before:
             games_crud.update_reparacion_partida(
@@ -523,42 +484,12 @@ async def _complete_mission(
             "type": "COMPLETE_MISSION",
             "player": player_key,
             "mission_id": mission_id,
-            **extra,
         },
         room_uuid,
     )
     if game_id_for_score is not None:
         await _broadcast_score_updated(db, room_uuid, game_id_for_score, player_score)
     await _publish_mission_update(game_code, "completed", player_key, mission_id)
-    return "ok"
-
-
-def _naive_utc(dt: object) -> Optional[datetime]:
-    """Convierte fechas de BD a UTC naive para comparar con datetime.utcnow()."""
-    if dt is None or not isinstance(dt, datetime):
-        return None
-    if dt.tzinfo is not None:
-        return dt.astimezone(timezone.utc).replace(tzinfo=None)
-    return dt
-
-
-def _game_clock_payload(db: Session, g) -> dict[str, object]:
-    """Límite y tiempo restante (segundos) para monitor / broadcast; alineado con `partidas.tiempo_limite_minutos`."""
-    limit_min = max(0, int(getattr(g, "tiempo_limite_minutos", 0) or 0))
-    limit_sec = limit_min * 60
-    out: dict[str, object] = {
-        "time_limit_seconds": limit_sec,
-    }
-    en_curso = lookup.get_game_state(db, "en_curso")
-    in_progress = en_curso is not None and g.id_estado_partida == en_curso.id_estado_partida
-    remaining = limit_sec
-    if in_progress and g.fecha_inicio:
-        start = _naive_utc(g.fecha_inicio)
-        if start is not None:
-            elapsed = int((datetime.utcnow() - start).total_seconds())
-            remaining = max(0, limit_sec - elapsed)
-    out["time_remaining"] = remaining
-    return out
 
 
 async def _broadcast_game_started(room_uuid: str, game_id: int, started: object) -> None:
@@ -647,12 +578,7 @@ async def websocket_endpoint(websocket: WebSocket, game_code: str, ws_code: str)
 
     await manager.connect_player(websocket, room_uuid)
 
-    display_name: Optional[str] = None
-    if player_id is not None:
-        with Session(engine) as db:
-            display_name = games_crud.display_name_for_game_player(db, game_id, player_id)
-    manager.register_live_player(websocket, room_uuid, player_key, display_name)
-    joined_payload: dict[str, object] = {
+    await manager.broadcast_to_room({
         "event": "PLAYER_JOINED",
         "player": player_key,
         "room": room_uuid,
@@ -749,124 +675,36 @@ async def websocket_endpoint(websocket: WebSocket, game_code: str, ws_code: str)
                         await _sabotage_mission(
                             db, player_id, player_key, room_uuid, game_code, mission_id
                         )
-                        if not ok:
-                            await websocket.send_json(
-                                {
-                                    "type": "MISSION_NOT_FOUND",
-                                    "mission_id": mission_id,
-                                    "message": "No hay registro de misión de jugador para esta instancia.",
-                                }
-                            )
-                            continue
             elif action == "mision_desaboteada":
                 mission_id = _parse_int(data.get("mission_id"))
                 if mission_id is None:
                     await websocket.send_json({"type": "MISSION_ID_REQUIRED"})
                     continue
+                data["id_mision_relacionada"] = mission_id
                 with Session(engine) as db:
-                    resolved = missions_crud.resolve_mision_partida_instance_id(
-                        db, game_id, player_id, mission_id
+                    await _desabotage_mission(
+                        db, player_key, room_uuid, game_code, mission_id
                     )
-                if resolved is None:
-                    await websocket.send_json(
-                        {
-                            "type": "MISSION_NOT_FOUND",
-                            "mission_id": mission_id,
-                            "message": "Misión no encontrada o no asignada a este jugador en la partida.",
-                        }
-                    )
-                    continue
-                data["id_mision_relacionada"] = resolved
-                with Session(engine) as db:
-                    ok = await _desabotage_mission(
-                        db, player_key, room_uuid, game_code, resolved
-                    )
-                if not ok:
-                    await websocket.send_json(
-                        {
-                            "type": "MISSION_NOT_FOUND",
-                            "mission_id": mission_id,
-                            "resolved_mision_partida_id": resolved,
-                            "message": "No hay registro de misión de jugador para esta instancia.",
-                        }
-                    )
-                    continue
             elif action == "mision_iniciada":
                 mission_id = _parse_int(data.get("mission_id"))
                 if mission_id is None:
                     await websocket.send_json({"type": "MISSION_ID_REQUIRED"})
                     continue
+                data["id_mision_relacionada"] = mission_id
                 with Session(engine) as db:
-                    resolved = missions_crud.resolve_mision_partida_instance_id(
-                        db, game_id, player_id, mission_id
+                    await _start_mission(
+                        db, player_key, room_uuid, game_code, mission_id
                     )
-                if resolved is None:
-                    await websocket.send_json(
-                        {
-                            "type": "MISSION_NOT_FOUND",
-                            "mission_id": mission_id,
-                            "message": "Misión no encontrada o no asignada a este jugador en la partida.",
-                        }
-                    )
-                    continue
-                data["id_mision_relacionada"] = resolved
-                with Session(engine) as db:
-                    ok = await _start_mission(
-                        db, player_key, room_uuid, game_code, resolved, player_id
-                    )
-                if not ok:
-                    await websocket.send_json(
-                        {
-                            "type": "MISSION_NOT_FOUND",
-                            "mission_id": mission_id,
-                            "resolved_mision_partida_id": resolved,
-                            "message": "No hay registro de misión de jugador para esta instancia.",
-                        }
-                    )
-                    continue
             elif action == "mision_completada":
                 mission_id = _parse_int(data.get("mission_id"))
-                print(mission_id)
                 if mission_id is None:
                     await websocket.send_json({"type": "MISSION_ID_REQUIRED"})
                     continue
+                data["id_mision_relacionada"] = mission_id
                 with Session(engine) as db:
-                    resolved = missions_crud.resolve_mision_partida_instance_id(
-                        db, game_id, player_id, mission_id
+                    await _complete_mission(
+                        db, player_key, room_uuid, game_code, mission_id
                     )
-                if resolved is None:
-                    await websocket.send_json(
-                        {
-                            "type": "MISSION_NOT_FOUND",
-                            "mission_id": mission_id,
-                            "message": "Misión no encontrada o no asignada a este jugador en la partida.",
-                        }
-                    )
-                    continue
-                data["id_mision_relacionada"] = resolved
-                with Session(engine) as db:
-                    outcome = await _complete_mission(
-                        db, player_key, room_uuid, game_code, resolved, player_id
-                    )
-                if outcome == "not_found":
-                    await websocket.send_json(
-                        {
-                            "type": "MISSION_NOT_FOUND",
-                            "mission_id": mission_id,
-                            "resolved_mision_partida_id": resolved,
-                            "message": "No hay registro de misión de jugador para esta instancia.",
-                        }
-                    )
-                    continue
-                if outcome == "already_done":
-                    await websocket.send_json(
-                        {
-                            "type": "MISSION_ALREADY_COMPLETED",
-                            "mission_id": mission_id,
-                            "resolved_mision_partida_id": resolved,
-                        }
-                    )
-                    continue
             elif action == "voto":
                 target = _parse_int(data.get("id_usuario_afectado"))
                 await manager.broadcast_to_room(
@@ -914,46 +752,24 @@ async def websocket_endpoint(websocket: WebSocket, game_code: str, ws_code: str)
                 await _broadcast_game_ended(room_uuid, ended)
             elif action == "salir":
                 await _complete_player_exit(
-                    websocket,
-                    room_uuid,
-                    game_code,
-                    game_id,
-                    ws_code,
-                    player_id,
-                    "intentional",
-                    remove_from_db=True,
+                    websocket, room_uuid, game_code, game_id, ws_code, player_id, "intentional"
                 )
                 handled_exit = True
                 return
             else:
-                # Generic relay: never let clients spoof device-ingress framing.
-                if isinstance(data, dict) and data.get("source") == "mqtt":
-                    continue
                 await manager.broadcast_to_room(data, room_uuid)
 
             if persist_event:
                 with Session(engine) as db:
-                    raw_mision_rel = _parse_int(data.get("id_mision_relacionada"))
-                    fk_mision_catalog: Optional[int] = None
-                    if raw_mision_rel is not None:
-                        fk_mision_catalog = missions_crud.resolve_catalog_mision_id_for_eventos(
-                            db, raw_mision_rel
-                        )
-                    try:
-                        create_game_event_by_type(
-                            db,
-                            game_id,
-                            action,
-                            player_id,
-                            _parse_int(data.get("id_usuario_afectado")),
-                            fk_mision_catalog,
-                            data.get("descripcion"),
-                        )
-                    except Exception as persist_exc:
-                        print(
-                            f"⚠️ No se pudo persistir evento de partida "
-                            f"(action={action!r}): {persist_exc}"
-                        )
+                    create_game_event_by_type(
+                        db,
+                        game_id,
+                        action,
+                        player_id,
+                        _parse_int(data.get("id_usuario_afectado")),
+                        _parse_int(data.get("id_mision_relacionada")),
+                        data.get("descripcion"),
+                    )
     except WebSocketDisconnect:
         exit_reason = "disconnect"
     except Exception:
@@ -963,64 +779,6 @@ async def websocket_endpoint(websocket: WebSocket, game_code: str, ws_code: str)
             await _complete_player_exit(
                 websocket, room_uuid, game_code, game_id, ws_code, player_id, exit_reason
             )
-
-
-def _monitor_live_snapshot(db: Session, game_id: int) -> dict[str, object]:
-    """Estado de partida en curso para el monitor: % reparación, puntuaciones, nombres."""
-    out: dict[str, object] = {}
-    g = games_crud.get_game_by_id(db, game_id)
-    if g is None:
-        return out
-    en_curso = lookup.get_game_state(db, "en_curso")
-    if en_curso is not None and g.id_estado_partida == en_curso.id_estado_partida:
-        out["game_in_progress"] = True
-    raw = g.porcentaje_reparacion_actual
-    if raw is not None:
-        try:
-            out["progress"] = max(0, min(100, int(round(float(str(raw))))))
-        except ValueError:
-            out["progress"] = 0
-    rows = games_crud.player_game(db, game_id)
-    out["scores"] = {str(r.id_usuario): int(r.puntos_partida or 0) for r in rows}
-    names: dict[str, str] = {}
-    for r in rows:
-        nm = games_crud.display_name_for_game_player(db, game_id, r.id_usuario) or ""
-        nm = str(nm).strip()
-        if nm:
-            names[str(r.id_usuario)] = nm
-    if names:
-        out["player_names"] = names
-    out.update(_game_clock_payload(db, g))
-    return out
-
-
-def _monitor_connected_players_payload(room_uuid: str, game_code: str, game_id: int) -> list[dict[str, object]]:
-    """WS de juego activo + jugadores con token REST (create/join) sin WS (p. ej. creador en lobby)."""
-    live_rows = manager.snapshot_connected_players(room_uuid)
-    live_ids: set[int] = set()
-    for row in live_rows:
-        pid = _parse_int(row.get("player"))
-        if pid is not None:
-            live_ids.add(pid)
-
-    pending_ids: set[int] = set()
-    for _tok, (cp, uid) in manager.ws_sessions.items():
-        if cp == game_code and uid not in live_ids:
-            pending_ids.add(uid)
-
-    extras: list[dict[str, object]] = []
-    for uid in sorted(pending_ids):
-        with Session(engine) as db:
-            display_name = games_crud.display_name_for_game_player(db, game_id, uid)
-        extras.append(
-            {
-                "player": str(uid),
-                "nombre_usuario": display_name,
-                "player_name": display_name,
-                "connected": False,
-            }
-        )
-    return live_rows + extras
 
 
 @app.websocket("/ws/monitor/{game_code}")
@@ -1153,3 +911,4 @@ def read_root():
 
 app.include_router(games_router, prefix='/games')
 app.include_router(users_router, prefix='/users')
+

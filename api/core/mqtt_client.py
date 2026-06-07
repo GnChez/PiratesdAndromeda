@@ -1,48 +1,13 @@
-"""
-MQTT pipeline (minimal).
-
-INGRESS (server subscribes ONLY to this):
-    juego/devices/<join_code>/<nombre_juego>/<evento>
-    where <evento> ∈ {started, completed, sabotaged, desabotaged}
-
-Canonical JSON body:
-    {"username": "joan", "mission_id": 1}
-
-Behavior:
-- Extra fields in the JSON are silently ignored.
-- If `username` is not a player of <join_code>, OR `mission_id` does not resolve to a
-  mission in that partida, the message is DROPPED with a warning (no DB write, no WS).
-- For valid messages we (a) run the matching DB side effect and (b) broadcast a
-  minimal payload to the room's websocket.
-
-EGRESS:
-    juego/commands/<join_code>/<game>/<event>   (server -> hardware)
-    via `publish_mission_event(...)`. Topic format is intentionally kept stable.
-
-Outbound WS body for a device event (broadcast to room):
-    {
-      "type": "START_MISSION" | "COMPLETE_MISSION" | "SABOTAGE" | "DESABOTAGE",
-      "source": "mqtt",
-      "action": "started" | "completed" | "sabotaged" | "desabotaged",
-      "player": "<id_usuario>",       # mismo criterio que WS de app (monitor / puntuación)
-      "username": "joan",
-      "mission_id": 1,
-      "mission_name": "...",    # omitted when not resolvable
-      "join_code": "UV2924",
-      "nombre_juego": "JUEGOLED"
-    }
-"""
-
-import asyncio
 import json
-import logging
+import aiomqtt
+import asyncio
+from core.socket_manager import manager
+from dotenv import load_dotenv
 import os
 from typing import Any
 from sqlmodel import Session, select
 import CRUD.missions as missions_crud
 import CRUD.games as games_crud
-import CRUD.missions as missions_crud
-from core.socket_manager import manager
 from db.dbconnection import engine
 from models.users import Usuarios
 
@@ -54,22 +19,23 @@ TOPIC_SENSORS = "juego/devices/#"  # juego/devices/{room code}/{game}/started
 TOPIC_COMMANDS = "juego/commands/#"
 TOPIC_MISSION_COMMAND_TEMPLATE = "juego/commands/{join_code}/missions/{event}"
 load_dotenv()
-
-MQTT_BROKER ="129.158.197.45"
-MQTT_PORT = 1883
-TOPIC_DEVICES_SUBSCRIBE = "juego/devices/#"
-TOPIC_MISSION_COMMAND_TEMPLATE = "juego/commands/{join_code}/{game}/{event}"
-
 USERNAME = os.environ.get("MQTT_USER")
 PWD = os.environ.get("PASSWORD")
 
-# Single source of truth for action -> WS type mapping.
-ACTION_TO_TYPE: dict[str, str] = {
-    "started": "START_MISSION",
-    "completed": "COMPLETE_MISSION",
-    "sabotaged": "SABOTAGE",
-    "desabotaged": "DESABOTAGE",
-}
+
+def _extract_message_text(payload: Any) -> str:
+    """Normaliza distintos formatos de payload a texto."""
+    if isinstance(payload, dict):
+        if "action" in payload:
+            return str(payload["action"])
+        if "id_usuario" in payload:
+            return str(payload["id_usuario"])
+        if len(payload) == 1:
+            return str(next(iter(payload.values())))
+        return json.dumps(payload, ensure_ascii=False)
+    if isinstance(payload, list):
+        return json.dumps(payload, ensure_ascii=False)
+    return str(payload)
 
 
 def _maybe_decode_json(value: Any) -> Any:
@@ -106,8 +72,12 @@ def _extract_username(payload: Any) -> str | None:
 def _extract_mission_id(payload: Any) -> int | None:
     if not isinstance(payload, dict):
         return None
-    s = val.strip()
-    if not s.startswith("{"):
+    mission_id = (
+        payload.get("mission_id")
+        or payload.get("id_mision_partida")
+        or payload.get("id_mision")
+    )
+    if mission_id is None:
         return None
     try:
         return int(mission_id)
@@ -120,36 +90,17 @@ def _decode_payload(raw_payload: bytes) -> Any:
     try:
         return _normalize_payload(json.loads(decoded_payload))
     except json.JSONDecodeError:
-        return None
-    return inner if isinstance(inner, dict) else None
+        return {"raw_payload": decoded_payload}
 
 
 def _extract_join_code(topic_parts: list[str]) -> str | None:
     if len(topic_parts) < 3:
         return None
-
-    user = db.exec(
-        select(Usuarios).where(Usuarios.nombre_usuario == username)
-    ).first()
-    if user is None:
+    if topic_parts[0] != "juego":
         return None
-    player_row = db.exec(
-        select(JugadoresPartida).where(
-            JugadoresPartida.id_partida == partida.id_partida,
-            JugadoresPartida.id_usuario == user.id_usuario,
-        )
-    ).first()
-    if player_row is None:
+    if topic_parts[1] not in {"devices", "commands"}:
         return None
-    mp = db.exec(
-        select(MisionesPartida).where(
-            MisionesPartida.id_mision == mission_id,
-            MisionesPartida.id_partida == partida.id_partida,
-        )
-    ).first()
-    if mp is None:
-        return None
-    return partida, mp, user.id_usuario
+    return topic_parts[2]
 
 
 def _is_server_mission_command(topic_parts: list[str], payload: Any) -> bool:
@@ -376,11 +327,11 @@ async def _handle_command_event(topic_parts: list[str], payload: Any) -> None:
     if not join_code:
         print(f"Topic de comando invalido: {'/'.join(topic_parts)}")
         return
-    await manager.broadcast_to_room(message, room_uuid)
+
+    await _broadcast_room_event(join_code, "IOT_COMMAND", payload)
 
 
 async def publish_mqtt_message(topic: str, payload: dict[str, Any]) -> None:
-    """Open a short-lived connection and publish a JSON payload."""
     async with aiomqtt.Client(
         hostname=MQTT_BROKER,
         port=MQTT_PORT,
@@ -390,22 +341,12 @@ async def publish_mqtt_message(topic: str, payload: dict[str, Any]) -> None:
         await client.publish(topic, json.dumps(payload, ensure_ascii=False))
 
 
-async def publish_mission_event(
-    join_code: str,
-    event: str,
-    payload: dict[str, Any],
-    *,
-    game: str = "MISSION",
-) -> None:
-    """Server -> hardware: publish to juego/commands/<join_code>/<game>/<event>."""
-    topic = TOPIC_MISSION_COMMAND_TEMPLATE.format(
-        join_code=join_code, game=game, event=event
-    )
+async def publish_mission_event(join_code: str, event: str, payload: dict[str, Any]) -> None:
+    topic = TOPIC_MISSION_COMMAND_TEMPLATE.format(join_code=join_code, event=event)
     await publish_mqtt_message(topic, payload)
 
 
-async def game_mqtt() -> None:
-    """Subscribe forever to the devices topic and dispatch each message."""
+async def game_mqtt():
     while True:
         try:
             async with aiomqtt.Client(hostname=MQTT_BROKER, port=MQTT_PORT, username=USERNAME, password=PWD) as client:
@@ -415,7 +356,8 @@ async def game_mqtt() -> None:
                 print(f"Conectado a MQTT. Escuchando: {TOPIC_COMMANDS}")
                 async for message in client.messages:
                     try:
-                        topic_parts = message.topic.value.split("/")
+                        topic = message.topic.value
+                        topic_parts = topic.split("/")
                         payload = _decode_payload(message.payload)
                         if message.topic.matches("juego/devices/#"):
                             await _handle_device_event(topic_parts, payload)

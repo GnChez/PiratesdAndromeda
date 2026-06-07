@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import List, Optional
+from typing import List
 
 from sqlalchemy import func
 from sqlmodel import Session, select
@@ -126,21 +126,16 @@ def update_mission_start_time(db: Session, mission_id: int) -> MisionesPartidaJu
     return row
 
 
-def update_mission_completion(
-    db: Session, mission_id: int
-) -> tuple[MisionesPartidaJugador | None, bool]:
-    """Marca misión como completada. Devuelve (fila, True) si fue la primera vez, (fila, False) si ya estaba completada."""
+def update_mission_completion(db: Session, mission_id: int) -> MisionesPartidaJugador | None:
     row = _get_mision_partida_jugador(db, mission_id)
     if not row:
-        return None, False
-    if row.id_estado_mision == 3:
-        return row, False
+        return None
     row.fecha_completada = datetime.now()
     row.id_estado_mision = 3
     db.add(row)
     db.commit()
     db.refresh(row)
-    return row, True
+    return row
 
 
 def update_mission_sabotage(db: Session, mission_id: int) -> MisionesPartidaJugador | None:
