@@ -1,0 +1,13 @@
+passlib[bcrypt]
+fastapi
+sqlmodel
+aiomysql
+pymysql
+uvicorn
+python-dotenv
+psycopg2-binary
+websockets
+aiomqtt
+pymysql
+nanoid
+email-validator
